@@ -1,6 +1,6 @@
 package logger
 
-const (
+var (
 	KeyModule = "module"
 	KeyErr    = "err"
 )
