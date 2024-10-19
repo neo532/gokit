@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/neo532/gokit/logger"
+	"github.com/neo532/gokit/logger/writer/lumberjack"
 )
 
 func createLog() (h logger.Logger) {
@@ -15,9 +16,13 @@ func createLog() (h logger.Logger) {
 	cp(context.Background())
 
 	l := New(
-		WithFilename("./test.log"),
-		WithMaxBackups(2),
-		WithMaxSize(2),
+		WithWriter(
+			lumberjack.New(
+				lumberjack.WithFilename("./test.log"),
+				lumberjack.WithMaxBackups(2),
+				lumberjack.WithMaxSize(2),
+			),
+		),
 		WithLevel("debug"),
 		// WithGlobalParam("a", "b", "1", "2"),
 		// WithContextParam(cp),

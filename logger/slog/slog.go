@@ -4,9 +4,9 @@ import (
 	"context"
 	"log/slog"
 
-	"gopkg.in/natefinch/lumberjack.v2"
-
 	"github.com/neo532/gokit/logger"
+	"github.com/neo532/gokit/logger/writer"
+	"github.com/neo532/gokit/logger/writer/stdout"
 )
 
 var _ logger.ILogger = (*Logger)(nil)
@@ -16,9 +16,9 @@ type Logger struct {
 	paramGlobal  []interface{}
 	paramContext []logger.ILoggerArgs
 
-	syncerConf *lumberjack.Logger
-	logger     *slog.Logger
-	opts       *slog.HandlerOptions
+	writer writer.Writer
+	logger *slog.Logger
+	opts   *slog.HandlerOptions
 }
 
 func New(opts ...Option) (l *Logger) {
@@ -26,7 +26,7 @@ func New(opts ...Option) (l *Logger) {
 	l = &Logger{
 		paramGlobal:  make([]interface{}, 0, 2),
 		paramContext: make([]logger.ILoggerArgs, 0, 2),
-		syncerConf:   &lumberjack.Logger{},
+		writer:       stdout.New(),
 		opts:         &slog.HandlerOptions{},
 	}
 	for _, o := range opts {
@@ -41,7 +41,7 @@ func New(opts ...Option) (l *Logger) {
 	}
 
 	l.logger = slog.New(
-		slog.NewJSONHandler(l.syncerConf, l.opts),
+		slog.NewJSONHandler(l.writer.Writer(), l.opts),
 	).With(l.paramGlobal...)
 	return
 }
@@ -51,7 +51,7 @@ func (l *Logger) Opts() *slog.HandlerOptions {
 }
 
 func (l *Logger) Close() (err error) {
-	return l.syncerConf.Close()
+	return l.writer.Close()
 }
 
 func (l *Logger) ParamContext() []logger.ILoggerArgs {

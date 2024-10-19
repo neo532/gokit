@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/neo532/gokit/logger"
+	"github.com/neo532/gokit/logger/writer"
 )
 
 type Option func(opt *Logger)
@@ -72,32 +73,8 @@ func WithLevel(lv string) Option {
 	}
 }
 
-func WithFilename(s string) Option {
+func WithWriter(w writer.Writer) Option {
 	return func(l *Logger) {
-		l.syncerConf.Filename = s
-	}
-}
-
-func WithMaxSize(i int) Option {
-	return func(l *Logger) {
-		l.syncerConf.MaxSize = i
-	}
-}
-
-func WithMaxAge(i int) Option {
-	return func(l *Logger) {
-		l.syncerConf.MaxAge = i
-	}
-}
-
-func WithMaxBackups(i int) Option {
-	return func(l *Logger) {
-		l.syncerConf.MaxBackups = i
-	}
-}
-
-func WithCompress(b bool) Option {
-	return func(l *Logger) {
-		l.syncerConf.Compress = b
+		l.writer = w
 	}
 }

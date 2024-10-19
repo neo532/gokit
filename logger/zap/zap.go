@@ -11,9 +11,10 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/neo532/gokit/logger"
+	"github.com/neo532/gokit/logger/writer"
+	"github.com/neo532/gokit/logger/writer/stdout"
 )
 
 var _ logger.ILogger = (*Logger)(nil)
@@ -23,8 +24,8 @@ type Logger struct {
 	paramGlobal  []interface{}
 	paramContext []logger.ILoggerArgs
 
-	syncerConf *lumberjack.Logger
-	logger     *zap.Logger
+	writer writer.Writer
+	logger *zap.Logger
 
 	encoder      zapcore.Encoder
 	writeSyncer  zapcore.WriteSyncer
@@ -39,7 +40,7 @@ func New(opts ...Option) (l *Logger) {
 	l = &Logger{
 		paramGlobal:  make([]interface{}, 0, 2),
 		paramContext: make([]logger.ILoggerArgs, 0, 2),
-		syncerConf:   &lumberjack.Logger{},
+		writer:       stdout.New(),
 		core: zapcore.EncoderConfig{
 			LevelKey:       "level",
 			TimeKey:        "time",
@@ -65,7 +66,7 @@ func New(opts ...Option) (l *Logger) {
 	l.logger = zap.New(
 		zapcore.NewCore(
 			zapcore.NewJSONEncoder(l.core),
-			zapcore.AddSync(l.syncerConf),
+			zapcore.AddSync(l.writer.Writer()),
 			l.levelEnabler,
 		),
 		l.opts...)
@@ -104,7 +105,7 @@ func (l *Logger) Log(c context.Context, level logger.Level, message string, p ..
 
 func (l *Logger) Close() (err error) {
 	err = l.logger.Sync()
-	if er := l.syncerConf.Close(); er != nil {
+	if er := l.writer.Close(); er != nil {
 		if err != nil {
 			err = errors.Wrap(err, er.Error())
 			return
