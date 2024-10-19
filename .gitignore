@@ -1,0 +1,6 @@
+go.sum
+*.log
+
+.DS_Store
+*.sw[op]
+.fsw.yml
