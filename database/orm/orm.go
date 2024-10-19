@@ -22,6 +22,7 @@ import (
 
 	//"gorm.io/gorm/hints"
 	"github.com/neo532/gokit/database"
+	ilogger "github.com/neo532/gokit/logger"
 )
 
 var (
@@ -76,7 +77,7 @@ func WithTablePrefix(s string) Option {
 		o.GormOpt.schema.TablePrefix = s
 	}
 }
-func WithLogger(l database.Logger) Option {
+func WithLogger(l ilogger.ILogger) Option {
 	return func(o *Orm) {
 		o.gormLogger.logger = l
 	}
@@ -119,7 +120,7 @@ func New(name string, dsn gorm.Dialector, opts ...Option) (db *Orm) {
 		GormOpt: &gormOpt{
 			schema: schema.NamingStrategy{},
 		},
-		gormLogger:      &gormLogger{Name: name, logger: database.NewDefaultLogger()},
+		gormLogger:      &gormLogger{Name: name, logger: ilogger.NewDefaultILogger()},
 		Opts:            make([]func(db *sql.DB), 0),
 		ConnMaxLifetime: 3 * time.Second,
 		OptsHash:        make(map[string]interface{}, 3),
@@ -224,7 +225,7 @@ type gormLogger struct {
 
 	Name                string          `json:"name"`
 	slowLogTime         time.Duration   `json:"slowTime"`
-	logger              database.Logger `json:"-"`
+	logger              ilogger.ILogger `json:"-"`
 	recordNotFoundError bool            `json:"recordNotFoundError"`
 
 	LogLevel logger.LogLevel `json:"-"`

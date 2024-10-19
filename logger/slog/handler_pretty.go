@@ -16,13 +16,13 @@ import (
 type PrettyHandler struct {
 	slog.Handler
 	l            *log.Logger
-	contextParam []logger.ILoggerArgs
+	contextParam []logger.ContextArgs
 }
 
 func NewPrettyHandler(
 	out io.Writer,
 	opts *slog.HandlerOptions,
-	contextParam []logger.ILoggerArgs,
+	contextParam []logger.ContextArgs,
 ) *PrettyHandler {
 	h := &PrettyHandler{
 		Handler:      slog.NewJSONHandler(out, opts),

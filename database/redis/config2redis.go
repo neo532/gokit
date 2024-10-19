@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 
-	"github.com/neo532/gokit/database"
+	"github.com/neo532/gokit/logger"
 )
 
 /*
@@ -12,7 +12,7 @@ import (
  * @date 2024-10-19
  */
 
-func Connect(c context.Context, cfg *Config, rc *ConnectConfig, l database.Logger) *Redis {
+func Connect(c context.Context, cfg *Config, rc *ConnectConfig, l logger.ILogger) *Redis {
 	return New(
 		rc.Name,
 		rc.Addr,
@@ -23,13 +23,13 @@ func Connect(c context.Context, cfg *Config, rc *ConnectConfig, l database.Logge
 	)
 }
 
-func NewRediss(c context.Context, d *Config, l database.Logger) (*Rediss, func(), error) {
+func NewRediss(c context.Context, d *Config, l logger.ILogger) (*Rediss, func(), error) {
 	rdbs := News()
 	With(c, rdbs, d, l)
 	return rdbs, rdbs.Close(), rdbs.Error()
 }
 
-func With(c context.Context, rdbs *Rediss, d *Config, l database.Logger) (*Rediss, func(), error) {
+func With(c context.Context, rdbs *Rediss, d *Config, l logger.ILogger) (*Rediss, func(), error) {
 	opts := make([]RedissOpt, 0, 4)
 	if d.Default != nil {
 		for _, v := range d.Default {

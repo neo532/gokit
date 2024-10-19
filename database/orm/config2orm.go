@@ -3,8 +3,9 @@ package orm
 import (
 	"context"
 
-	"github.com/neo532/gokit/database"
 	"gorm.io/driver/mysql"
+
+	"github.com/neo532/gokit/logger"
 )
 
 /*
@@ -13,7 +14,7 @@ import (
  * @date 2024-05-18
  */
 
-func Connect(c context.Context, cfg *Config, dsn *DsnConfig, logger database.Logger) *Orm {
+func Connect(c context.Context, cfg *Config, dsn *DsnConfig, logger logger.ILogger) *Orm {
 	return New(
 		dsn.Name,
 		mysql.Open(dsn.Dsn),
@@ -29,13 +30,13 @@ func Connect(c context.Context, cfg *Config, dsn *DsnConfig, logger database.Log
 	)
 }
 
-func NewOrms(c context.Context, d *Config, l database.Logger) (*Orms, func(), error) {
+func NewOrms(c context.Context, d *Config, l logger.ILogger) (*Orms, func(), error) {
 	dbs := News()
 	With(c, dbs, d, l)
 	return dbs, dbs.Close(), dbs.Error()
 }
 
-func With(c context.Context, dbs *Orms, d *Config, l database.Logger) (*Orms, func(), error) {
+func With(c context.Context, dbs *Orms, d *Config, l logger.ILogger) (*Orms, func(), error) {
 	opts := make([]OrmsOpt, 0, 4)
 	if d.Read != nil {
 		for _, dsn := range d.Read {

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/neo532/gokit/database"
+	"github.com/neo532/gokit/logger"
 )
 
 func getConfig() (d *Config) {
@@ -33,7 +33,7 @@ func getConfig() (d *Config) {
 }
 
 func InitDB() (dbs *Orms, clean func(), err error) {
-	logger := database.NewDefaultLogger()
+	logger := logger.NewDefaultILogger()
 	c := context.Background()
 	var d *Config
 

@@ -9,12 +9,12 @@ import (
 	"github.com/neo532/gokit/logger/writer/stdout"
 )
 
-var _ logger.ILogger = (*Logger)(nil)
+var _ logger.Executor = (*Logger)(nil)
 
 type Logger struct {
 	err          error
 	paramGlobal  []interface{}
-	paramContext []logger.ILoggerArgs
+	paramContext []logger.ContextArgs
 
 	writer writer.Writer
 	logger *slog.Logger
@@ -25,7 +25,7 @@ func New(opts ...Option) (l *Logger) {
 
 	l = &Logger{
 		paramGlobal:  make([]interface{}, 0, 2),
-		paramContext: make([]logger.ILoggerArgs, 0, 2),
+		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
 		opts:         &slog.HandlerOptions{},
 	}
@@ -54,7 +54,7 @@ func (l *Logger) Close() (err error) {
 	return l.writer.Close()
 }
 
-func (l *Logger) ParamContext() []logger.ILoggerArgs {
+func (l *Logger) ParamContext() []logger.ContextArgs {
 	return l.paramContext
 }
 

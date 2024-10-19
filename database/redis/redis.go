@@ -18,6 +18,7 @@ import (
 	"github.com/go-redis/redis/v8"
 
 	"github.com/neo532/gokit/database"
+	"github.com/neo532/gokit/logger"
 )
 
 // ========== Option ==========
@@ -59,7 +60,7 @@ func WithSlowTime(t time.Duration) Option {
 		o.redisLogger.slowLogTime = t
 	}
 }
-func WithLogger(l database.Logger) Option {
+func WithLogger(l logger.ILogger) Option {
 	return func(o *Redis) {
 		o.redisLogger.logger = l
 	}
@@ -103,7 +104,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 		bootstrapContext: context.Background(),
 		redisLogger: &RedisLogger{
 			Name:        name,
-			logger:      database.NewDefaultLogger(),
+			logger:      logger.NewDefaultILogger(),
 			slowLogTime: 10 * time.Second,
 		},
 		key: name + ":" + addr,
@@ -177,9 +178,9 @@ func (o *Redis) Close() func() {
 type redisCtxBegintimeKey struct{}
 
 type RedisLogger struct {
-	Name        string          `json:"name"`
-	slowLogTime time.Duration   `json:"slowTime"`
-	logger      database.Logger `json:"-"`
+	Name        string         `json:"name"`
+	slowLogTime time.Duration  `json:"slowTime"`
+	logger      logger.ILogger `json:"-"`
 }
 
 func (h *RedisLogger) BeforeProcess(c context.Context, cmd redis.Cmder) (context.Context, error) {

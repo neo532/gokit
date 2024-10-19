@@ -19,7 +19,7 @@ func WithLogger(log *syslog.Writer) Option {
 	}
 }
 
-func WithContextParam(fns ...logger.ILoggerArgs) Option {
+func WithContextParam(fns ...logger.ContextArgs) Option {
 	return func(l *Logger) {
 		l.paramContext = fns
 	}

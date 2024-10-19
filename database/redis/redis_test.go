@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/neo532/gokit/database"
+	"github.com/neo532/gokit/logger"
 )
 
 func getConfig() (rdbs *Config) {
@@ -27,7 +27,7 @@ func getConfig() (rdbs *Config) {
 }
 
 func InitRDB() (rdbs *Rediss, clean func(), err error) {
-	logger := database.NewDefaultLogger()
+	logger := logger.NewDefaultILogger()
 	c := context.Background()
 	var d *Config
 

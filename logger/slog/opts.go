@@ -50,7 +50,7 @@ func WithReplaceAttr(fns ...func() (k string, v interface{})) Option {
 	}
 }
 
-func WithContextParam(fns ...logger.ILoggerArgs) Option {
+func WithContextParam(fns ...logger.ContextArgs) Option {
 	return func(l *Logger) {
 		l.paramContext = fns
 	}

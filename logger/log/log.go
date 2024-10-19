@@ -17,12 +17,12 @@ import (
 	"github.com/neo532/gokit/logger"
 )
 
-var _ logger.ILogger = (*Logger)(nil)
+var _ logger.Executor = (*Logger)(nil)
 
 type Logger struct {
 	err          error
 	paramGlobal  []interface{}
-	paramContext []logger.ILoggerArgs
+	paramContext []logger.ContextArgs
 
 	logger *syslog.Writer
 }
@@ -30,7 +30,7 @@ type Logger struct {
 func New(opts ...Option) (l *Logger) {
 	l = &Logger{
 		paramGlobal:  make([]interface{}, 0, 2),
-		paramContext: make([]logger.ILoggerArgs, 0, 2),
+		paramContext: make([]logger.ContextArgs, 0, 2),
 	}
 	for _, o := range opts {
 		o(l)

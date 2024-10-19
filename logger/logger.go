@@ -4,12 +4,12 @@ import (
 	"context"
 )
 
-type ILogger interface {
+type Executor interface {
 	Log(c context.Context, level Level, message string, kvs ...interface{}) error
 	Close() error
 }
 
-type ILoggerArgs func(c context.Context) (k string, v interface{})
+type ContextArgs func(c context.Context) (k string, v interface{})
 
 type Logger interface {
 	WithArgs(kvs ...interface{}) (n Logger)

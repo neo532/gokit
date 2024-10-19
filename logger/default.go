@@ -6,12 +6,12 @@ import (
 )
 
 type DefaultLogger struct {
-	log        ILogger
+	log        Executor
 	globalArgs []interface{}
 	level      Level
 }
 
-func NewDefaultLogger(l ILogger) Logger {
+func NewDefaultLogger(l Executor) Logger {
 	return &DefaultLogger{
 		log:        l,
 		globalArgs: make([]interface{}, 0, 2),
