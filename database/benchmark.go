@@ -10,6 +10,8 @@ import (
 	"context"
 )
 
+var _ Benchmarker = (*DefaultBenchmarker)(nil)
+
 type Benchmarker interface {
 	Judge(c context.Context) (b bool)
 }

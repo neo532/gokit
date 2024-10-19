@@ -7,6 +7,8 @@ import (
 	"github.com/neo532/gokit/crypt/encoding/std"
 )
 
+var _ crypt.Crypt = (*RSA)(nil)
+
 type RSA struct {
 	publicKey  []byte
 	privateKey []byte

@@ -2,9 +2,12 @@ package cbc
 
 import (
 	"github.com/forgoer/openssl"
+
 	"github.com/neo532/gokit/crypt"
 	"github.com/neo532/gokit/crypt/encoding/std"
 )
+
+var _ crypt.Crypt = (*CBC)(nil)
 
 type CBC struct {
 	padding string

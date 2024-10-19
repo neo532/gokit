@@ -13,6 +13,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var _ Pooler = (*RandomPolicy)(nil)
+
 type Pooler interface {
 	Choose(c context.Context, dbs *DBs) *gorm.DB
 }

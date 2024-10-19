@@ -11,6 +11,8 @@ import (
  * @date 2024-05-18
  */
 
+var _ Logger = (*DefaultLogger)(nil)
+
 type Logger interface {
 	Error(c context.Context, message string, kvs ...interface{})
 	Warn(c context.Context, message string, kvs ...interface{})

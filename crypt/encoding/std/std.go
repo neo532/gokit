@@ -2,7 +2,11 @@ package std
 
 import (
 	"encoding/base64"
+
+	"github.com/neo532/gokit/crypt"
 )
+
+var _ crypt.Encoding = (*Std)(nil)
 
 type Std struct {
 }

@@ -10,6 +10,8 @@ import (
 	"context"
 )
 
+var _ Grayer = (*DefaultGrayer)(nil)
+
 type Grayer interface {
 	Judge(c context.Context) (b bool)
 }

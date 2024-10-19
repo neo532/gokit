@@ -4,10 +4,13 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+
+	"github.com/neo532/gokit/crypt"
 )
 
 var (
-	ErrContainDelimiter = errors.New("Please input a string without delimiter")
+	ErrContainDelimiter             = errors.New("Please input a string without delimiter")
+	_                   crypt.Crypt = (*Unicode)(nil)
 )
 
 type Unicode struct {

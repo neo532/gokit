@@ -7,10 +7,12 @@ import (
 	"github.com/neo532/gokit/crypt/encoding/std"
 )
 
+var _ crypt.Crypt = (*ECB)(nil)
+
 type ECB struct {
 	padding string
 	key     []byte
-	coding  crypt.IEncoding
+	coding  crypt.Encoding
 }
 
 type opt func(o *ECB)
@@ -25,7 +27,7 @@ func WithKey(key string) opt {
 		o.key = []byte(key)
 	}
 }
-func WithEncoding(coding crypt.IEncoding) opt {
+func WithEncoding(coding crypt.Encoding) opt {
 	return func(o *ECB) {
 		o.coding = coding
 	}

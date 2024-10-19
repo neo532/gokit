@@ -13,6 +13,8 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+var _ Pooler = (*RandomPolicy)(nil)
+
 type Pooler interface {
 	Choose(c context.Context, rdbs *Rdbs) *redis.Client
 }
