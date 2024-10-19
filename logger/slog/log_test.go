@@ -58,14 +58,14 @@ func TestLogger(t *testing.T) {
 	c := context.Background()
 	h := createLog()
 	for i := 0; i < 1; i++ {
-		h.WithArgs(logger.LogkeyModule, "m1").Error(c, "kkkk", "vvvv", "cc")
-		h.WithArgs(logger.LogkeyModule, "m1").WithLevel(logger.LevelFatal).Error(c, "kkkk", "vvvv", "cc")
-		h.WithArgs(logger.LogkeyModule, "m2").Errorf(c, "kkkk%s", "cc")
+		h.WithArgs(logger.KeyModule, "m1").Error(c, "kkkk", "vvvv", "cc")
+		h.WithArgs(logger.KeyModule, "m1").WithLevel(logger.LevelFatal).Error(c, "kkkk", "vvvv", "cc")
+		h.WithArgs(logger.KeyModule, "m2").Errorf(c, "kkkk%s", "cc")
 	}
 
 	a(c, h)
 }
 
 func a(c context.Context, h logger.Logger) {
-	h.WithArgs(logger.LogkeyModule, "m3").Errorf(c, "kkkk%s", "cc")
+	h.WithArgs(logger.KeyModule, "m3").Errorf(c, "kkkk%s", "cc")
 }

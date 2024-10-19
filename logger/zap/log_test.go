@@ -42,13 +42,13 @@ func TestLogger(t *testing.T) {
 		// h.Error(c, "k")
 		// time.Sleep(10 * time.Second)
 		// return
-		h.WithArgs(logger.LogkeyModule, "m1").WithLevel(logger.LevelWarn).Info(c, "kkkk", "vvvv", "cc")
-		h.WithArgs(logger.LogkeyModule, "m2").Errorf(c, "kkkk%s", "cc")
+		h.WithArgs(logger.KeyModule, "m1").WithLevel(logger.LevelWarn).Info(c, "kkkk", "vvvv", "cc")
+		h.WithArgs(logger.KeyModule, "m2").Errorf(c, "kkkk%s", "cc")
 	}
 
 	a(c, h)
 }
 
 func a(c context.Context, h logger.Logger) {
-	h.WithArgs(logger.LogkeyModule, "m3").Errorf(c, "kkkk%s", "cc")
+	h.WithArgs(logger.KeyModule, "m3").Errorf(c, "kkkk%s", "cc")
 }
