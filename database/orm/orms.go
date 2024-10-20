@@ -213,22 +213,22 @@ func (d *Orms) Close() func() {
 	return func() {
 		if d.read != nil {
 			for _, o := range d.read.dbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 		if d.write != nil {
 			for _, o := range d.write.dbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 		if d.shadowRead != nil {
 			for _, o := range d.shadowRead.dbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 		if d.shadowWrite != nil {
 			for _, o := range d.shadowWrite.dbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 	}

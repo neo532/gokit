@@ -163,17 +163,17 @@ func (d *Rediss) Close() func() {
 	return func() {
 		if d.def != nil {
 			for _, o := range d.def.rdbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 		if d.shadow != nil {
 			for _, o := range d.shadow.rdbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 		if d.gray != nil {
 			for _, o := range d.gray.rdbs {
-				o.Close()
+				o.Close()()
 			}
 		}
 	}

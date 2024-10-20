@@ -32,7 +32,7 @@ func getConfig() (d *Config) {
 	return
 }
 
-func InitDB() (dbs *Orms, clean func(), err error) {
+func initDB() (dbs *Orms, clean func(), err error) {
 	logger := logger.NewDefaultILogger()
 	c := context.Background()
 	var d *Config
@@ -47,7 +47,7 @@ func InitDB() (dbs *Orms, clean func(), err error) {
 
 func TestOrms(t *testing.T) {
 
-	dbs, clean, err := InitDB()
+	dbs, clean, err := initDB()
 	defer clean()
 	if err != nil {
 		t.Error(err)
@@ -70,7 +70,7 @@ func TestOrms(t *testing.T) {
 
 func TestTransaction(t *testing.T) {
 
-	dbs, clean, err := InitDB()
+	dbs, clean, err := initDB()
 	defer clean()
 	if err != nil {
 		t.Error(err)

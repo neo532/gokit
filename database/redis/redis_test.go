@@ -26,7 +26,7 @@ func getConfig() (rdbs *Config) {
 	return
 }
 
-func InitRDB() (rdbs *Rediss, clean func(), err error) {
+func initRDB() (rdbs *Rediss, clean func(), err error) {
 	logger := logger.NewDefaultILogger()
 	c := context.Background()
 	var d *Config
@@ -41,7 +41,7 @@ func InitRDB() (rdbs *Rediss, clean func(), err error) {
 
 func TestRediss(t *testing.T) {
 
-	rdbs, clean, err := InitRDB()
+	rdbs, clean, err := initRDB()
 	defer clean()
 	if err != nil {
 		t.Error(err)
