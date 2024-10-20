@@ -26,32 +26,32 @@ type Option func(*Redis)
 
 func WithMaxRetries(i int) Option {
 	return func(o *Redis) {
-		o.redisOpt.MaxRetries = i
+		o.RedisOpt.MaxRetries = i
 	}
 }
 func WithReadTimeout(t time.Duration) Option {
 	return func(o *Redis) {
-		o.redisOpt.ReadTimeout = t
+		o.RedisOpt.ReadTimeout = t
 	}
 }
 func WithIdleTimeout(t time.Duration) Option {
 	return func(o *Redis) {
-		o.redisOpt.IdleTimeout = t
+		o.RedisOpt.IdleTimeout = t
 	}
 }
 func WithPoolSize(i int) Option {
 	return func(o *Redis) {
-		o.redisOpt.PoolSize = i
+		o.RedisOpt.PoolSize = i
 	}
 }
 func WithPassword(s string) Option {
 	return func(o *Redis) {
-		o.redisOpt.Password = s
+		o.RedisOpt.Password = s
 	}
 }
 func WithDb(i int32) Option {
 	return func(o *Redis) {
-		o.redisOpt.DB = int(i)
+		o.RedisOpt.DB = int(i)
 		o.redisLogger.Name += fmt.Sprintf("[%d]", i)
 	}
 }
@@ -86,7 +86,7 @@ type Redis struct {
 	key              string          `json:"-"`
 
 	client   *redis.Client  `json:"-"`
-	redisOpt *redis.Options `json:"redisOpt"`
+	RedisOpt *redis.Options `json:"redisOpt"`
 }
 
 func New(name string, addr string, opts ...Option) (rdb *Redis) {
@@ -94,7 +94,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 	defer instanceLock.Unlock()
 
 	rdb = &Redis{
-		redisOpt: &redis.Options{
+		RedisOpt: &redis.Options{
 			Addr:        addr,
 			PoolSize:    200,
 			IdleTimeout: 240 * time.Second,
@@ -120,7 +120,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 		rdb = r
 		return
 	}
-	rdb.client = redis.NewClient(rdb.redisOpt)
+	rdb.client = redis.NewClient(rdb.RedisOpt)
 	rdb.client.AddHook(rdb.redisLogger)
 
 	if rdb.err = rdb.client.Ping(rdb.bootstrapContext).Err(); rdb.err != nil {

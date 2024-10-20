@@ -39,7 +39,7 @@ type Option func(*Orm)
 
 func WithMaxIdleConns(i int32) Option {
 	return func(o *Orm) {
-		o.Opts = append(o.Opts, func(db *sql.DB) {
+		o.opts = append(o.opts, func(db *sql.DB) {
 			db.SetMaxIdleConns(int(i))
 		})
 		o.OptsHash["SetMaxIdleConns"] = i
@@ -47,7 +47,7 @@ func WithMaxIdleConns(i int32) Option {
 }
 func WithMaxOpenConns(i int32) Option {
 	return func(o *Orm) {
-		o.Opts = append(o.Opts, func(db *sql.DB) {
+		o.opts = append(o.opts, func(db *sql.DB) {
 			db.SetMaxOpenConns(int(i))
 		})
 		o.OptsHash["SetMaxOpenConns"] = i
@@ -55,7 +55,7 @@ func WithMaxOpenConns(i int32) Option {
 }
 func WithConnMaxLifetime(t time.Duration) Option {
 	return func(o *Orm) {
-		o.Opts = append(o.Opts, func(db *sql.DB) {
+		o.opts = append(o.opts, func(db *sql.DB) {
 			db.SetConnMaxLifetime(t)
 			o.ConnMaxLifetime = t
 		})
@@ -64,12 +64,12 @@ func WithConnMaxLifetime(t time.Duration) Option {
 }
 func WithRecordNotFoundError(b bool) Option {
 	return func(o *Orm) {
-		o.gormLogger.recordNotFoundError = b
+		o.GormLogger.recordNotFoundError = b
 	}
 }
 func WithSlowLog(t time.Duration) Option {
 	return func(o *Orm) {
-		o.gormLogger.slowLogTime = t
+		o.GormLogger.slowLogTime = t
 	}
 }
 func WithTablePrefix(s string) Option {
@@ -79,7 +79,7 @@ func WithTablePrefix(s string) Option {
 }
 func WithLogger(l ilogger.ILogger) Option {
 	return func(o *Orm) {
-		o.gormLogger.logger = l
+		o.GormLogger.logger = l
 	}
 }
 func WithSingularTable() Option {
@@ -101,9 +101,9 @@ type Orm struct {
 	bootstrapContext context.Context `json:"-"`
 	ConnMaxLifetime  time.Duration   `json:"-"`
 
-	gormLogger *gormLogger            `json:"gormLogger"`
+	GormLogger *gormLogger            `json:"gormLogger"`
 	GormOpt    *gormOpt               `json:"gormOpt"`
-	Opts       []func(db *sql.DB)     `json:"-"`
+	opts       []func(db *sql.DB)     `json:"-"`
 	OptsHash   map[string]interface{} `json:"optsHash"`
 
 	key string `json:"-"`
@@ -120,8 +120,8 @@ func New(name string, dsn gorm.Dialector, opts ...Option) (db *Orm) {
 		GormOpt: &gormOpt{
 			schema: schema.NamingStrategy{},
 		},
-		gormLogger:      &gormLogger{Name: name, logger: ilogger.NewDefaultILogger()},
-		Opts:            make([]func(db *sql.DB), 0),
+		GormLogger:      &gormLogger{Name: name, logger: ilogger.NewDefaultILogger()},
+		opts:            make([]func(db *sql.DB), 0),
 		ConnMaxLifetime: 3 * time.Second,
 		OptsHash:        make(map[string]interface{}, 3),
 		key:             name,
@@ -145,7 +145,7 @@ func New(name string, dsn gorm.Dialector, opts ...Option) (db *Orm) {
 	db.orm, db.err = gorm.Open(
 		dsn,
 		&gorm.Config{
-			Logger:         db.gormLogger,
+			Logger:         db.GormLogger,
 			NamingStrategy: db.GormOpt.schema,
 			ClauseBuilders: map[string]clause.ClauseBuilder{
 				//hints.Comment("select", "master"),
@@ -164,7 +164,7 @@ func New(name string, dsn gorm.Dialector, opts ...Option) (db *Orm) {
 		db.LogError("Orm DB has error")
 		return
 	}
-	for _, o := range db.Opts {
+	for _, o := range db.opts {
 		o(sqlDB)
 	}
 
@@ -188,18 +188,18 @@ func New(name string, dsn gorm.Dialector, opts ...Option) (db *Orm) {
 }
 
 func (o *Orm) LogError(message string) {
-	o.gormLogger.logger.Error(
+	o.GormLogger.logger.Error(
 		o.bootstrapContext,
 		message,
-		database.KeyName, o.gormLogger.Name,
+		database.KeyName, o.GormLogger.Name,
 		database.KeyError, o.err,
 	)
 }
 func (o *Orm) LogWarn(message string) {
-	o.gormLogger.logger.Warn(
+	o.GormLogger.logger.Warn(
 		o.bootstrapContext,
 		message,
-		database.KeyName, o.gormLogger.Name,
+		database.KeyName, o.GormLogger.Name,
 		database.KeyError, o.err,
 	)
 }
