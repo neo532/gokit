@@ -16,6 +16,20 @@ import (
 	"github.com/neo532/gokit/queue"
 )
 
+func TraceID() queue.ConsumerMiddleware {
+	return func(handler queue.ConsumerHandler) queue.ConsumerHandler {
+		return func(c context.Context, message []byte) (err error) {
+
+			if h, ok := queue.GetHeaderFromContext(c); ok {
+				fmt.Println(fmt.Sprintf("h.Value(traceID):\t%+v", h.Value("traceID")))
+				c = context.WithValue(c, "traceID", h.Value("traceID"))
+			}
+			err = handler(c, message)
+			return
+		}
+	}
+}
+
 func TestConsumer(t *testing.T) {
 	var err error
 	c, cancel := context.WithCancel(context.Background())
@@ -29,9 +43,9 @@ func TestConsumer(t *testing.T) {
 		WithTopics("message"),
 		WithHandler(func(ctx context.Context, message []byte) (err error) {
 			fmt.Println(runtime.Caller(0))
-			panic(0)
 			return
 		}),
+		WithMiddleware(TraceID()),
 	)
 	go func() {
 		for {

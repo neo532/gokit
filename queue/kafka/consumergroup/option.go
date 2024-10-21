@@ -13,6 +13,7 @@ import (
 	"github.com/IBM/sarama"
 
 	"github.com/neo532/gokit/logger"
+	"github.com/neo532/gokit/queue"
 	"github.com/neo532/gokit/queue/kafka"
 )
 
@@ -68,5 +69,10 @@ func WithHandler(fn func(ctx context.Context, message []byte) (err error)) Optio
 func WithContext(c context.Context) Option {
 	return func(o *ConsumerGroup) {
 		o.bootstrapContext = c
+	}
+}
+func WithMiddleware(ms ...queue.ConsumerMiddleware) Option {
+	return func(o *ConsumerGroup) {
+		o.handler.middleware = append(o.handler.middleware, ms...)
 	}
 }

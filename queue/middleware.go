@@ -4,15 +4,31 @@ import (
 	"context"
 )
 
-// Handler defines the handler invoked by Middleware.
-type Handler func(c context.Context, message interface{}) error
+// ProducerHandler defines the handler invoked by Middleware.
+type ProducerHandler func(c context.Context, message interface{}) error
 
-// Middleware is queue transport middleware.
-type Middleware func(Handler) Handler
+// ProducerMiddleware is queue transport middleware.
+type ProducerMiddleware func(ProducerHandler) ProducerHandler
 
-// Chain returns a Middleware that specifies the chained handler for endpoint.
-func Chain(m ...Middleware) Middleware {
-	return func(next Handler) Handler {
+// Chain returns a ProducerMiddleware that specifies the chained handler for endpoint.
+func ChainProducer(m ...ProducerMiddleware) ProducerMiddleware {
+	return func(next ProducerHandler) ProducerHandler {
+		for i := len(m) - 1; i >= 0; i-- {
+			next = m[i](next)
+		}
+		return next
+	}
+}
+
+// ConsumerHandler defines the handler invoked by Middleware.
+type ConsumerHandler func(c context.Context, message []byte) error
+
+// ConsumerMiddleware is queue transport middleware.
+type ConsumerMiddleware func(ConsumerHandler) ConsumerHandler
+
+// Chain returns a ConsumerMiddleware that specifies the chained handler for endpoint.
+func ChainConsumer(m ...ConsumerMiddleware) ConsumerMiddleware {
+	return func(next ConsumerHandler) ConsumerHandler {
 		for i := len(m) - 1; i >= 0; i-- {
 			next = m[i](next)
 		}

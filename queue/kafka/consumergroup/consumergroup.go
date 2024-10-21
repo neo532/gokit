@@ -24,17 +24,16 @@ var _ queue.Consumer = (*ConsumerGroup)(nil)
 
 // ========== ConsumerGroup ==========
 type ConsumerGroup struct {
-	name  string
-	conf  *sarama.Config
-	addrs []string
-	group string
-	err   error
-
-	goCount          int
-	bootstrapContext context.Context
-
+	conf    *sarama.Config
+	addrs   []string
+	group   string
 	topics  []string
 	handler *groupHandler
+
+	name             string
+	err              error
+	goCount          int
+	bootstrapContext context.Context
 
 	consumer sarama.ConsumerGroup
 }
@@ -49,9 +48,10 @@ func NewGroup(name string, addrs []string, group string, opts ...Option) (csm *C
 		group:   group,
 		goCount: runtime.NumCPU() / 2,
 		handler: &groupHandler{
-			name:     name,
-			slowTime: 3 * time.Second,
-			logger:   logger.NewDefaultILogger(),
+			name:       name,
+			slowTime:   3 * time.Second,
+			logger:     logger.NewDefaultILogger(),
+			middleware: make([]queue.ConsumerMiddleware, 0, 1),
 		},
 		bootstrapContext: context.Background(),
 	}
@@ -148,7 +148,8 @@ type groupHandler struct {
 	handler    func(ctx context.Context, message []byte) (err error)
 	slowTime   time.Duration
 	logger     logger.ILogger
-	msg        []byte
+	consumer   sarama.ConsumerGroup
+	middleware []queue.ConsumerMiddleware `json:"-"`
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
@@ -166,6 +167,7 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 
 	c := session.Context()
 	var message []byte
+	var ps []interface{}
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -178,22 +180,49 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		time.Sleep(time.Second)
 	}()
 
-	for msg := range claim.Messages() {
+	hdl := func(c context.Context, message []byte) (err error) {
+		err = h.handler(c, message)
+		return
+	}
 
-		message = msg.Value
+	for m := range claim.Messages() {
+
+		message = m.Value
+		ps = []interface{}{
+			queue.KeyName, h.name,
+			queue.KeyMessage, string(message),
+			queue.KeyPartition, m.Partition,
+			queue.KeyOffset, m.Offset,
+		}
+
+		c = queue.InitHeaderToContext(c)
+		if header, ok := queue.GetHeaderFromContext(c); ok {
+			fmt.Println(runtime.Caller(0))
+			for _, h := range m.Headers {
+				header.Set(string(h.Key), string(h.Value))
+			}
+		}
+
+		if len(h.middleware) > 0 {
+			hdl = queue.ChainConsumer(h.middleware...)(hdl)
+		}
 
 		begin := time.Now()
-		err := h.handler(c, message)
+		if err = hdl(c, message); err != nil {
+			ps = append(ps, queue.KeyErr, err)
+			h.logger.Error(c, "Consumer's Has err!", ps...)
+			return
+		}
 		cost := time.Since(begin)
+		ps = append(ps, "cost", cost)
+
 		// mark ok
-		session.MarkMessage(msg, "")
+		session.MarkMessage(m, "")
+
 		// biz error
 		if err != nil {
-			h.logger.Error(c, "Handler has error!",
-				queue.KeyName, h.name,
-				queue.KeyErr, err,
-				queue.KeyMessage, string(message),
-			)
+			ps = append(ps, queue.KeyErr, err)
+			h.logger.Error(c, "Handler has error!", ps...)
 			continue
 		}
 
@@ -203,24 +232,20 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 
 		// slow
 		if cost > h.slowTime {
-			h.logger.Warn(c, "slowlog",
-				queue.KeyName, h.name,
+			ps = append(ps,
 				"slowTime", h.slowTime,
-				"cost", cost,
-				queue.KeyMessage, string(message),
 			)
+			h.logger.Warn(c, "slowlog", ps...)
 			continue
 		}
 
 		// if h.env == middleware.EnvProd && utf8.RuneCount(msg.Value) > log.MaxMsgLength {
 		// 	msg.Value = []byte(string([]rune(string(msg.Value))[:log.MaxMsgLength]) + "...")
 		// }
-		h.logger.Info(c, string(message),
-			queue.KeyName, h.name,
-			queue.KeyPartition, msg.Partition,
-			queue.KeyOffset, msg.Offset,
-			"cost", cost,
-		)
+		h.logger.Info(c, "", ps...)
+
+		return
 	}
+
 	return nil
 }

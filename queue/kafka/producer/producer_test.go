@@ -8,8 +8,8 @@ import (
 	"github.com/neo532/gokit/queue"
 )
 
-func TraceID() queue.Middleware {
-	return func(handler queue.Handler) queue.Handler {
+func TraceID() queue.ProducerMiddleware {
+	return func(handler queue.ProducerHandler) queue.ProducerHandler {
 		return func(c context.Context, message interface{}) (err error) {
 
 			c = queue.AppendHeaderToContext(c, "traceID", "aaaaaaaa")

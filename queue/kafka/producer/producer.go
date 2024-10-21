@@ -43,13 +43,13 @@ type Producer struct {
 	syncProducer  sarama.SyncProducer  `json:"-"`
 	asyncProducer sarama.AsyncProducer `json:"-"`
 
-	key              string             `json:"-"`
-	logger           logger.ILogger     `json:"-"`
-	encoder          EncodeMessageFunc  `json:"-"`
-	close            func()             `json:"-"`
-	err              error              `json:"-"`
-	bootstrapContext context.Context    `json:"-"`
-	middleware       []queue.Middleware `json:"-"`
+	key              string                     `json:"-"`
+	logger           logger.ILogger             `json:"-"`
+	encoder          EncodeMessageFunc          `json:"-"`
+	close            func()                     `json:"-"`
+	err              error                      `json:"-"`
+	bootstrapContext context.Context            `json:"-"`
+	middleware       []queue.ProducerMiddleware `json:"-"`
 }
 
 func New(name string, addrs []string, opts ...Option) (pdc *Producer) {
@@ -65,7 +65,7 @@ func New(name string, addrs []string, opts ...Option) (pdc *Producer) {
 		logger:           logger.NewDefaultILogger(),
 		bootstrapContext: context.Background(),
 		encoder:          JsonMessageEncoder,
-		middleware:       make([]queue.Middleware, 0, 1),
+		middleware:       make([]queue.ProducerMiddleware, 0, 1),
 	}
 	pdc.Conf.Version = sarama.V0_11_0_2
 	pdc.Conf.Producer.Return.Successes = true
@@ -204,7 +204,7 @@ func (pdc *Producer) Send(c context.Context, message interface{}) (err error) {
 	}
 
 	if len(pdc.middleware) > 0 {
-		h = queue.Chain(pdc.middleware...)(h)
+		h = queue.ChainProducer(pdc.middleware...)(h)
 	}
 
 	if err = h(c, message); err != nil {

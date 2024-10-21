@@ -81,7 +81,7 @@ func WithNetMaxOpenRequest(i int) Option {
 	}
 }
 
-func WithMiddleware(ms ...queue.Middleware) Option {
+func WithMiddleware(ms ...queue.ProducerMiddleware) Option {
 	return func(o *Producer) {
 		o.middleware = append(o.middleware, ms...)
 	}
