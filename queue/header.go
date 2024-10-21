@@ -22,7 +22,7 @@ func GetHeaderFromContext(ctx context.Context) (h Header, b bool) {
 
 func AppendHeaderToContext(c context.Context, kv ...string) context.Context {
 	if len(kv)%2 == 1 {
-		panic(fmt.Sprintf("metadata: AppendHeaderToContext got an odd number of input pairs for header: %d", len(kv)))
+		panic(fmt.Sprintf("header: AppendHeaderToContext got an odd number of input pairs for header: %d", len(kv)))
 	}
 
 	if h, ok := GetHeaderFromContext(c); ok {

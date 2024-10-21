@@ -1,7 +1,7 @@
 package queue
 
 /*
- * @abstract queue's Producer define
+ * @abstract queue's interface define
  * @mail neo532@126.com
  * @date 2024-10-21
  */
@@ -11,9 +11,9 @@ import (
 )
 
 type Producer interface {
-	Err() error
-	Close() func()
 	Send(c context.Context, message interface{}) (err error)
+	Close() func()
+	Err() error
 }
 
 type Consumer interface {
