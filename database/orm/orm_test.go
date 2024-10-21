@@ -24,10 +24,10 @@ func getConfig() (d *Config) {
 		MaxSlowtime:         3 * time.Second,
 		TablePrefix:         "",
 		RecordNotFoundError: false,
-		Read:                []*DsnConfig{&DsnConfig{Name: "default_read", Dsn: dsn}},
-		Write:               []*DsnConfig{&DsnConfig{Name: "default_write", Dsn: dsn}},
-		ShadowRead:          []*DsnConfig{&DsnConfig{Name: "default_shadowread", Dsn: dsn}},
-		ShadowWrite:         []*DsnConfig{&DsnConfig{Name: "default_shadowwrite", Dsn: dsn}},
+		Read:                []*DsnConfig{{Name: "default_read", Dsn: dsn}},
+		Write:               []*DsnConfig{{Name: "default_write", Dsn: dsn}},
+		ShadowRead:          []*DsnConfig{{Name: "default_shadowread", Dsn: dsn}},
+		ShadowWrite:         []*DsnConfig{{Name: "default_shadowwrite", Dsn: dsn}},
 	}
 	return
 }

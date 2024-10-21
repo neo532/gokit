@@ -16,7 +16,7 @@ import (
 )
 
 func getConfig() (rdbs *Config) {
-	d := []*ConnectConfig{&ConnectConfig{Name: "default", Addr: "127.0.0.1:6379"}}
+	d := []*ConnectConfig{{Name: "default", Addr: "127.0.0.1:6379"}}
 	rdbs = &Config{
 		MaxSlowtime: 3 * time.Second,
 		Default:     d,

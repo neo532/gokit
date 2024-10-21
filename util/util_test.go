@@ -54,7 +54,7 @@ func TestFreq(t *testing.T) {
 
 	preKey := "user.test"
 	rule := []FreqRule{
-		FreqRule{Duri: "10", Times: 2},
+		{Duri: "10", Times: 2},
 	}
 
 	count := 10000
