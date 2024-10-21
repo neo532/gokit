@@ -65,8 +65,7 @@ func NewDistributedLock(d IDistributedLockDb) *DistributedLock {
 		db:       d,
 		duration: time.Duration(50) * time.Millisecond,
 		genCode: func() (s string, err error) {
-			//s = uuid.NewV4().String()
-			s = uuid.New().String()
+			s = uuid.NewString()
 			return
 		},
 	}
