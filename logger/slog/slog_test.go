@@ -9,7 +9,7 @@ import (
 	"github.com/neo532/gokit/logger/writer/lumberjack"
 )
 
-func createLog() (h logger.Logger) {
+func newSlog() (h logger.Logger) {
 	cp := func(c context.Context) (key string, value interface{}) {
 		return "aa", "bbbbbbbbb"
 	}
@@ -56,7 +56,7 @@ func createLog() (h logger.Logger) {
 func TestLogger(t *testing.T) {
 
 	c := context.Background()
-	h := createLog()
+	h := newSlog()
 	for i := 0; i < 1; i++ {
 		h.WithArgs(logger.KeyModule, "m1").Error(c, "kkkk", "vvvv", "cc")
 		h.WithArgs(logger.KeyModule, "m1").WithLevel(logger.LevelFatal).Error(c, "kkkk", "vvvv", "cc")

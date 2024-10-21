@@ -12,17 +12,23 @@ Gokit is a toolkit written by Go (Golang).It aims to speed up the development.
 - [Gofr Web Framework](#gofr-web-framework)
     - [Installation](#installation)
     - [Usage](#Usage)
-        - [Crypt](#HTTP-request)
-        - [Distributed-lock](#Distributed-lock)
+        - [Frequency controller](#Frequency-controller)
+        - [Logger](#Logger)
+            - [Slog](#Slog)
+            - [Zap](#Zap)
         - [Database](#Database)
             - [Orm](#Orm)
             - [Redis](#Redis)
-        - [Logger](#Logger)
         - [Queue](#Queue)
             - [Kafka](Kafka)
-        - [Frequency controller](#Frequency-controller)
-        - [Page Execute](#Page-Execute)
         - [Guard panic](#Guard-panic)
+        - [Distributed-lock](#Distributed-lock)
+        - [Page Execute](#Page-Execute)
+        - [Crypt](#Crypt)
+            - [Openssl](#Openssl)
+                - [Cbc](#Cbc)
+                - [Ecb](#Ecb)
+                - [Rsa](#Rsa)
 
 
 
@@ -167,3 +173,121 @@ It is a tool to page slice.
 ```
 
 ### Guard panic
+
+It is a tool to exec goroutine safely.
+
+[example](https://github.com/neo532/gokit/blob/master/gofunc/gofunc_test.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/gofunc"
+    )
+
+    func main() {
+
+		fn := func(i int) (err error) {
+			// do something...
+			return
+		}
+
+		log := &gofunc.DefaultLogger{}
+		gofn := gofunc.NewGoFunc(gofunc.WithLogger(log), gofunc.WithMaxGoroutine(20))
+
+		l := 1000000
+		fns := make([]func(i int) error, 0, l)
+		for i := 0; i < l; i++ {
+			fns = append(fns, fn)
+		}
+
+		gofn.WithTimeout(c, time.Second*2, fns...)
+		err := log.Err()
+    }
+```
+
+### Logger
+
+It is a highly scalable logger.
+
+[example](https://github.com/neo532/gokit/blob/master/logger/slog/log_test.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/logger"
+    )
+
+    func main() {
+
+        c := context.Background()
+        var l logger.Logger
+        l = newSlog() // more detail in test file
+        l = newZap()  // more detail in test file
+
+        h.WithArgs(logger.KeyModule, "db").Error(c, "bug", "err", "panic")
+        h.WithArgs(logger.KeyModule, "queue").WithLevel(logger.LevelFatal).Error(c, "b1", "err", "p1")
+        h.WithArgs(logger.KeyModule, "redis").Errorf(c, "kkkk%s", "cc")
+    }
+```
+
+### Orm
+
+A well-encapsulated GORM that can support shadow databases, hot configuration updates, master-slave separation, high scalability, simplicity, and domain-layer transactions.
+
+[example](https://github.com/neo532/gokit/blob/master/database/orm/orm_test.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/database/orm"
+    )
+
+    func main() {
+
+        db, clean, err := initDB() // more detail in test file
+        defer clean()
+        if err != nil {
+            return
+        }
+
+        c := context.Background()
+        err = db.Transaction(c, func(c context.Context) (err error) {
+
+            var databases []string
+
+            if err = dbs.Write(c).Raw("show databases").Scan(&databases).Error; err != nil {
+                return
+            }
+
+            if err = dbs.Read(c).Raw("show databases").Scan(&databases).Error; err != nil {
+                return
+            }
+            return
+        })
+    }
+```
+
+
+### Redis
+
+A well-encapsulated Redis client that can support shadow databases, hot configuration updates, gray environment, high scalability and simplicity.
+
+[example](https://github.com/neo532/gokit/blob/master/database/redis/redis_test.go)
+
+```go
+    // more detail in test file
+```
+
+### Queue
+
+A message queue client with high scalability that supports the full-link connection between producers and consumers and also supports customizable middleware.
+
+[producer](https://github.com/neo532/gokit/blob/master/queue/kafka/producer/producer_test.go)
+[consumer](https://github.com/neo532/gokit/blob/master/queue/kafka/consumergroup/consumergroup_test.go)
+
+```go
+    // more detail in test file
+```

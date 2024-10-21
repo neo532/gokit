@@ -9,7 +9,7 @@ import (
 	"github.com/neo532/gokit/logger/writer/lumberjack"
 )
 
-func createLog() (h logger.Logger) {
+func newZap() (h logger.Logger) {
 	cp := func(c context.Context) (key string, value interface{}) {
 		return "aa", "bbbbbbbbb"
 	}
