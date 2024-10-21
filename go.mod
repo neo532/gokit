@@ -7,6 +7,7 @@ require (
 	github.com/fatih/color v1.17.0
 	github.com/forgoer/openssl v1.6.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/google/uuid v1.4.0
 	github.com/pkg/errors v0.9.1
 	go.uber.org/zap v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
