@@ -51,11 +51,6 @@ func WithGoCount(count int) Option {
 		o.goCount = count
 	}
 }
-func WithEnv(env string) Option {
-	return func(o *ConsumerGroup) {
-		o.handler.env = env
-	}
-}
 func WithTopics(s ...string) Option {
 	return func(o *ConsumerGroup) {
 		o.topics = s

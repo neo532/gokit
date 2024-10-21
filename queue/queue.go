@@ -15,3 +15,9 @@ type Producer interface {
 	Close() func()
 	Send(c context.Context, message interface{}) (err error)
 }
+
+type Consumer interface {
+	Start(context.Context) error
+	Stop(context.Context) error
+	Name() string
+}

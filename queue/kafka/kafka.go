@@ -1,7 +1,7 @@
 package kafka
 
 /*
- * @abstract kafka的具体参数定义
+ * @abstract kafka's inner logger
  * @mail neo532@126.com
  * @date 2023-08-13
  */

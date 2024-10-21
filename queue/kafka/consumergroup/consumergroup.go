@@ -30,7 +30,6 @@ type ConsumerGroup struct {
 	topics  []string
 	handler *groupHandler
 
-	name             string
 	err              error
 	goCount          int
 	bootstrapContext context.Context
@@ -42,7 +41,6 @@ func NewGroup(name string, addrs []string, group string, opts ...Option) (csm *C
 
 	// init parameter
 	csm = &ConsumerGroup{
-		name:    name,
 		conf:    sarama.NewConfig(),
 		addrs:   addrs,
 		group:   group,
@@ -88,7 +86,7 @@ func NewGroup(name string, addrs []string, group string, opts ...Option) (csm *C
 }
 
 func (csm *ConsumerGroup) Name() (name string) {
-	return csm.name
+	return csm.handler.name
 }
 
 func (csm *ConsumerGroup) Stop(c context.Context) (err error) {
@@ -120,7 +118,7 @@ func (csm *ConsumerGroup) Start(c context.Context) (err error) {
 					return
 				default:
 					csm.handler.logger.Info(c, "Consumer is starting!",
-						queue.KeyName, csm.name,
+						queue.KeyName, csm.handler.name,
 						queue.KeyTopic, strings.Join(csm.topics, ","),
 						queue.KeyAddr, strings.Join(csm.addrs, ","),
 						queue.KeyGroup, csm.group,
@@ -142,14 +140,12 @@ func (csm *ConsumerGroup) Start(c context.Context) (err error) {
 
 // Consumer represents a Sarama consumer group consumer
 type groupHandler struct {
-	env        string
 	name       string
 	autoCommit bool
 	handler    func(ctx context.Context, message []byte) (err error)
 	slowTime   time.Duration
 	logger     logger.ILogger
-	consumer   sarama.ConsumerGroup
-	middleware []queue.ConsumerMiddleware `json:"-"`
+	middleware []queue.ConsumerMiddleware
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
@@ -158,8 +154,8 @@ func (h *groupHandler) Setup(session sarama.ConsumerGroupSession) error {
 }
 
 // Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
-func (h *groupHandler) Cleanup(session sarama.ConsumerGroupSession) error {
-	return nil
+func (h *groupHandler) Cleanup(session sarama.ConsumerGroupSession) (err error) {
+	return
 }
 
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
@@ -190,14 +186,13 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		message = m.Value
 		ps = []interface{}{
 			queue.KeyName, h.name,
-			queue.KeyMessage, string(message),
 			queue.KeyPartition, m.Partition,
 			queue.KeyOffset, m.Offset,
+			queue.KeyMessage, string(message),
 		}
 
 		c = queue.InitHeaderToContext(c)
 		if header, ok := queue.GetHeaderFromContext(c); ok {
-			fmt.Println(runtime.Caller(0))
 			for _, h := range m.Headers {
 				header.Set(string(h.Key), string(h.Value))
 			}
@@ -239,13 +234,9 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 			continue
 		}
 
-		// if h.env == middleware.EnvProd && utf8.RuneCount(msg.Value) > log.MaxMsgLength {
-		// 	msg.Value = []byte(string([]rune(string(msg.Value))[:log.MaxMsgLength]) + "...")
-		// }
 		h.logger.Info(c, "", ps...)
-
 		return
 	}
 
-	return nil
+	return
 }
