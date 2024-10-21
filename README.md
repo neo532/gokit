@@ -1,4 +1,4 @@
-# Gofr Web Framework
+# Go's toolkit
 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/neo532/gokit)](https://goreportcard.com/report/github.com/neo532/gokit)
