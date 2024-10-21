@@ -20,7 +20,7 @@ Gokit is a toolkit written by Go (Golang).It aims to speed up the development.
             - [Orm](#Orm)
             - [Redis](#Redis)
         - [Queue](#Queue)
-            - [Kafka](Kafka)
+            - [Kafka](#Queue)
         - [Guard panic](#Guard-panic)
         - [Distributed-lock](#Distributed-lock)
         - [Page Execute](#Page-Execute)
