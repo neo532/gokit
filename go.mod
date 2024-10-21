@@ -6,10 +6,8 @@ require (
 	github.com/IBM/sarama v1.41.1
 	github.com/fatih/color v1.17.0
 	github.com/forgoer/openssl v1.6.0
-	github.com/go-kratos/kratos/v2 v2.8.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/pkg/errors v0.9.1
-	github.com/streadway/amqp v1.1.0
 	go.uber.org/zap v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.7
@@ -23,6 +21,7 @@ require (
 	github.com/eapache/go-resiliency v1.4.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
