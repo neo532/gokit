@@ -12,8 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/neo532/gokit/database"
 	"gorm.io/gorm"
+
+	"github.com/neo532/gokit/database"
 )
 
 type contextTransactionKey struct{}

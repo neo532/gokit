@@ -1,9 +1,8 @@
 package slog
 
 import (
-	"os"
-
 	"log/slog"
+	"os"
 
 	"github.com/neo532/gokit/logger"
 	"github.com/neo532/gokit/logger/writer"

@@ -3,8 +3,9 @@ package lumberjack
 import (
 	"io"
 
-	"github.com/neo532/gokit/logger/writer"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/neo532/gokit/logger/writer"
 )
 
 var _ writer.Writer = (*Writer)(nil)

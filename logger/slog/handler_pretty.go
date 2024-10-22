@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-
-	//"golang.org/x/exp/slog"
 	"log/slog"
 
 	"github.com/fatih/color"
+	//"golang.org/x/exp/slog"
+
 	"github.com/neo532/gokit/logger"
 )
 
