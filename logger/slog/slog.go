@@ -29,7 +29,7 @@ func New(opts ...Option) (l *Logger) {
 		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
 		opts:         &slog.HandlerOptions{},
-		level:        logger.ParseLevel("Info"),
+		level:        logger.ParseLevel(""),
 	}
 	for _, o := range opts {
 		o(l)

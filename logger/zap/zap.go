@@ -43,7 +43,7 @@ func New(opts ...Option) (l *Logger) {
 		paramGlobal:  make([]interface{}, 0, 2),
 		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
-		level:        logger.ParseLevel("Info"),
+		level:        logger.ParseLevel(""),
 		core: zapcore.EncoderConfig{
 			LevelKey:       "level",
 			TimeKey:        "time",
