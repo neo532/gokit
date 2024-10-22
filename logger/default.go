@@ -31,6 +31,7 @@ func (l *DefaultLogger) WithArgs(kvs ...interface{}) (n Logger) {
 	}
 }
 
+// WithLevel is only effective when the input parameter is higher than the original.
 func (l *DefaultLogger) WithLevel(lv Level) (n Logger) {
 	return &DefaultLogger{
 		log:        l.log,
