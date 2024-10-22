@@ -14,7 +14,7 @@ type DefaultLogger struct {
 func NewDefaultLogger(l Executor) Logger {
 	return &DefaultLogger{
 		log:        l,
-		globalArgs: make([]interface{}, 0, 2),
+		globalArgs: []interface{}{},
 		level:      l.Level(),
 	}
 }
