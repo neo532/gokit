@@ -14,20 +14,6 @@ func newSlog() (h logger.Logger) {
 		return "aa", "bbbbbbbbb"
 	}
 	sp := func(c context.Context) (key string, value interface{}) {
-		// file, line := logger.GetSourceByFunctionName(
-		// 	0,
-		// 	20,
-		// 	[]string{"github.com/neo532/gofr/logger/slog"},
-		// 	[]string{
-		// 		"github.com/neo532/gofr/logger/slog.GetSourceByFunctionName",
-		// 		"github.com/neo532/gofr/logger/slog.createLog.func2",
-		// 		"github.com/neo532/gofr/logger/slog.(*Logger).Log",
-		// 		"github.com/neo532/gofr/logger.(*Logger).Errorf",
-		// 		"github.com/neo532/gofr/logger.(*Logger).Error",
-		// 		"github.com/neo532/gofr/logger/slog.(*PrettyHandler).Handle",
-		// 	},
-		// )
-
 		file, line := logger.GetSourceByDepth(7)
 		return "source", fmt.Sprintf("%s,%d", file, line)
 	}
