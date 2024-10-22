@@ -138,8 +138,8 @@ It is a frequency with signle instance by redis.
         c := context.Background()
         preKey := "user.test"
         rule := []util.FreqRule{
-            tool.FreqRule{Duri: "10000", Times: 80},
-            tool.FreqRule{Duri: "today", Times: 5},
+            util.FreqRule{Duri: "10000", Times: 80},
+            util.FreqRule{Duri: "today", Times: 5},
         }
 
         fmt.Println(Freq.IncrCheck(c, preKey, rule...))
@@ -226,9 +226,9 @@ It is a highly scalable logger.
         l = newSlog() // more detail in test file
         l = newZap()  // more detail in test file
 
-        h.WithArgs(logger.KeyModule, "db").Error(c, "bug", "err", "panic")
-        h.WithArgs(logger.KeyModule, "queue").WithLevel(logger.LevelFatal).Error(c, "b1", "err", "p1")
-        h.WithArgs(logger.KeyModule, "redis").Errorf(c, "kkkk%s", "cc")
+        l.WithArgs(logger.KeyModule, "db").Error(c, "bug", "err", "panic")
+        l.WithArgs(logger.KeyModule, "queue").WithLevel(logger.LevelFatal).Error(c, "b1", "err", "p1")
+        l.WithArgs(logger.KeyModule, "redis").Errorf(c, "kkkk%s", "cc")
     }
 ```
 
