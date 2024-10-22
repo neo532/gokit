@@ -15,7 +15,7 @@ func WithLogger(log *slog.Logger) Option {
 
 		// free old
 		if l.writer != nil {
-			l.writer.Close()
+			l.Close()
 		}
 
 		l.logger = log
@@ -23,12 +23,13 @@ func WithLogger(log *slog.Logger) Option {
 	}
 }
 
+// WithPrettyLogger should be passed as a parameter at the end of the options.
 func WithPrettyLogger(handler slog.Handler) Option {
 	return func(l *Logger) {
 
 		// free old
 		if l.writer != nil {
-			l.writer.Close()
+			l.Close()
 		}
 
 		if handler == nil {

@@ -24,7 +24,7 @@ func WithLogger(log *zap.Logger) Option {
 	return func(l *Logger) {
 		// free old
 		if l.logger != nil {
-			l.logger.Sync()
+			l.Close()
 		}
 
 		l.logger = log
@@ -32,6 +32,7 @@ func WithLogger(log *zap.Logger) Option {
 	}
 }
 
+// WithPrettyLogger should be passed as a parameter at the end of the options.
 func WithPrettyLogger(w io.Writer) Option {
 	return func(l *Logger) {
 		if w == nil {
@@ -40,7 +41,7 @@ func WithPrettyLogger(w io.Writer) Option {
 
 		// free old
 		if l.logger != nil {
-			l.logger.Sync()
+			l.Close()
 		}
 
 		l.logger = zap.New(
