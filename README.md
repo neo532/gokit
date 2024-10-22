@@ -226,9 +226,9 @@ It is a highly scalable logger.
         l = newSlog() // more detail in test file
         l = newZap()  // more detail in test file
 
-		l.WithArgs(logger.KeyModule, "db").Info(c, "msg1", "err", "panic")
-		l.WithArgs(logger.KeyModule, "queue").WithLevel(logger.LevelError).Info(c, "m2", "e1", "p1")
-		l.WithArgs(logger.KeyModule, "redis").Errorf(c, "m%s", "3")
+        l.WithArgs(logger.KeyModule, "db").Info(c, "msg1", "err", "panic")
+        l.WithArgs(logger.KeyModule, "queue").WithLevel(logger.LevelError).Info(c, "m2", "e1", "p1")
+        l.WithArgs(logger.KeyModule, "redis").Errorf(c, "m%s", "3")
     }
 ```
 
