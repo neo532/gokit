@@ -56,19 +56,13 @@ func TestConsumer(t *testing.T) {
 		}
 	}()
 
-	for {
-		time.Sleep(4 * time.Second)
-		select {
-		case <-c.Done():
-			break
-		default:
-			if err = csm.Start(c); err != nil {
-				t.Errorf("%s has error[%+v]", t.Name(), err)
-				return
-			}
-
+	select {
+	case <-c.Done():
+		return
+	default:
+		if err = csm.Start(c); err != nil {
+			t.Errorf("%s has error[%+v]", t.Name(), err)
+			return
 		}
 	}
-	fmt.Println(runtime.Caller(0))
-
 }

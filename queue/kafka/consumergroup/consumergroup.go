@@ -8,10 +8,10 @@ package consumergroup
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -97,17 +97,23 @@ func (csm *ConsumerGroup) Stop(c context.Context) (err error) {
 }
 
 func (csm *ConsumerGroup) Start(c context.Context) (err error) {
+
+	var wg sync.WaitGroup
+	wg.Add(csm.goCount)
 	for i := 0; i < csm.goCount; i++ {
 		go func() {
 			defer func() {
 				if err := recover(); err != nil {
-					fmt.Println(runtime.Caller(0))
 					csm.handler.logger.Error(c, "Start has panic!",
 						queue.KeyErr, err,
 						"track", string(debug.Stack()),
 					)
 				}
+				wg.Done()
 			}()
+
+			maxRetries := 10
+			retryCount := 0
 
 			for {
 				select {
@@ -126,15 +132,25 @@ func (csm *ConsumerGroup) Start(c context.Context) (err error) {
 
 					// This method blocks until the consumer service is stopped
 					if err := csm.consumer.Consume(c, csm.topics, csm.handler); err != nil {
+
 						csm.handler.logger.Error(c, "Consume has error",
 							queue.KeyErr, err,
 						)
-						return
+
+						if retryCount >= maxRetries {
+							return
+						}
+						retryCount++
+						time.Sleep(time.Duration(1+retryCount) * time.Second)
+						break
 					}
+
+					return
 				}
 			}
 		}()
 	}
+	wg.Wait()
 	return
 }
 
@@ -181,61 +197,74 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		return
 	}
 
-	for m := range claim.Messages() {
+	for {
+		select {
+		case m, ok := <-claim.Messages():
 
-		message = m.Value
-		ps = []interface{}{
-			queue.KeyName, h.name,
-			queue.KeyPartition, m.Partition,
-			queue.KeyOffset, m.Offset,
-			queue.KeyMessage, string(message),
-		}
-
-		c = queue.InitHeaderToContext(c)
-		if header, ok := queue.GetHeaderFromContext(c); ok {
-			for _, h := range m.Headers {
-				header.Set(string(h.Key), string(h.Value))
+			message = m.Value
+			ps = []interface{}{
+				queue.KeyName, h.name,
+				queue.KeyPartition, m.Partition,
+				queue.KeyOffset, m.Offset,
+				queue.KeyMessage, string(message),
 			}
-		}
 
-		if len(h.middleware) > 0 {
-			hdl = queue.ChainConsumer(h.middleware...)(hdl)
-		}
+			if !ok {
+				h.logger.Warn(c, "message channel was closed!", ps...)
+				return
+			}
 
-		begin := time.Now()
-		if err = hdl(c, message); err != nil {
-			ps = append(ps, queue.KeyErr, err)
-			h.logger.Error(c, "Consumer's Has err!", ps...)
+			c = queue.InitHeaderToContext(c)
+			if header, ok := queue.GetHeaderFromContext(c); ok {
+				for _, h := range m.Headers {
+					header.Set(string(h.Key), string(h.Value))
+				}
+			}
+
+			if len(h.middleware) > 0 {
+				hdl = queue.ChainConsumer(h.middleware...)(hdl)
+			}
+
+			begin := time.Now()
+			if err = hdl(c, message); err != nil {
+				ps = append(ps, queue.KeyErr, err)
+				h.logger.Error(c, "Consumer's Has err!", ps...)
+				continue
+			}
+			cost := time.Since(begin)
+			ps = append(ps, "cost", cost)
+
+			// mark ok
+			session.MarkMessage(m, "")
+
+			// biz error
+			if err != nil {
+				ps = append(ps, queue.KeyErr, err)
+				h.logger.Error(c, "Handler has error!", ps...)
+				continue
+			}
+
+			if !h.autoCommit {
+				session.Commit()
+			}
+
+			// slow
+			if cost > h.slowTime {
+				ps = append(ps,
+					"slowTime", h.slowTime,
+				)
+				h.logger.Warn(c, "slowlog", ps...)
+				continue
+			}
+
+			h.logger.Info(c, "", ps...)
+
+		// Should return when `session.Context()` is done.
+		// If not, will raise `ErrRebalanceInProgress` or `read tcp <ip>:<port>: i/o timeout` when kafka rebalance. see:
+		// https://github.com/IBM/sarama/issues/1192
+		case <-session.Context().Done():
 			return
 		}
-		cost := time.Since(begin)
-		ps = append(ps, "cost", cost)
-
-		// mark ok
-		session.MarkMessage(m, "")
-
-		// biz error
-		if err != nil {
-			ps = append(ps, queue.KeyErr, err)
-			h.logger.Error(c, "Handler has error!", ps...)
-			continue
-		}
-
-		if !h.autoCommit {
-			session.Commit()
-		}
-
-		// slow
-		if cost > h.slowTime {
-			ps = append(ps,
-				"slowTime", h.slowTime,
-			)
-			h.logger.Warn(c, "slowlog", ps...)
-			continue
-		}
-
-		h.logger.Info(c, "", ps...)
-		return
 	}
 
 	return
