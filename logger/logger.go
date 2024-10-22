@@ -7,6 +7,7 @@ import (
 type Executor interface {
 	Log(c context.Context, level Level, message string, kvs ...interface{}) error
 	Close() error
+	Level() Level
 }
 
 type ContextArgs func(c context.Context) (k string, v interface{})

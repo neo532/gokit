@@ -43,13 +43,13 @@ func newSlog() (h logger.Logger) {
 			),
 		),
 		WithGlobalParam("a", "b", "1", "2"),
-		WithLevel("debug"),
+		WithLevel("info"),
 		WithContextParam(cp, sp),
 		WithReplaceAttr(func() (k string, v interface{}) { return "msg", "" }),
-		WithPrettyLogger(nil),
+		//WithPrettyLogger(nil),
 	)
-	if l.err != nil {
-		fmt.Println(fmt.Sprintf("err:\t%+v", l.err))
+	if err := l.Error(); err != nil {
+		fmt.Println(fmt.Sprintf("err:\t%+v", err))
 	}
 	return logger.NewDefaultLogger(l)
 }
@@ -58,14 +58,14 @@ func TestLogger(t *testing.T) {
 	c := context.Background()
 	h := newSlog()
 	for i := 0; i < 1; i++ {
-		h.WithArgs(logger.KeyModule, "m1").Error(c, "kkkk", "vvvv", "cc")
-		h.WithArgs(logger.KeyModule, "m1").WithLevel(logger.LevelFatal).Error(c, "kkkk", "vvvv", "cc")
-		h.WithArgs(logger.KeyModule, "m2").Errorf(c, "kkkk%s", "cc")
+		h.WithArgs(logger.KeyModule, "m1").Info(c, "msg1", "err", "panic")
+		h.WithArgs(logger.KeyModule, "m2").WithLevel(logger.LevelError).Info(c, "m2", "e1", "p1")
+		h.WithArgs(logger.KeyModule, "m3").Errorf(c, "m%s", "3")
 	}
 
 	a(c, h)
 }
 
 func a(c context.Context, h logger.Logger) {
-	h.WithArgs(logger.KeyModule, "m3").Errorf(c, "kkkk%s", "cc")
+	h.WithArgs(logger.KeyModule, "m4").Errorf(c, "m%s", "4")
 }

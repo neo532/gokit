@@ -13,6 +13,12 @@ type Option func(opt *Logger)
 
 func WithLogger(log *slog.Logger) Option {
 	return func(l *Logger) {
+
+		// free old
+		if l.writer != nil {
+			l.writer.Close()
+		}
+
 		l.logger = log
 		return
 	}
@@ -20,6 +26,12 @@ func WithLogger(log *slog.Logger) Option {
 
 func WithPrettyLogger(handler slog.Handler) Option {
 	return func(l *Logger) {
+
+		// free old
+		if l.writer != nil {
+			l.writer.Close()
+		}
+
 		if handler == nil {
 			l.logger = slog.New(
 				NewPrettyHandler(os.Stdout, l.opts, l.paramContext),
@@ -64,6 +76,14 @@ func WithGlobalParam(vs ...interface{}) Option {
 
 func WithLevel(lv string) Option {
 	return func(l *Logger) {
+
+		l.level = logger.ParseLevel(lv)
+
+		if l.level == logger.LevelFatal {
+			l.level = logger.LevelError
+			lv = l.level.String()
+		}
+
 		lvl := (&slog.LevelVar{})
 		if err := lvl.UnmarshalText([]byte(lv)); err != nil && l.err == nil {
 			l.err = err

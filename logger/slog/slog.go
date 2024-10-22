@@ -15,6 +15,7 @@ type Logger struct {
 	err          error
 	paramGlobal  []interface{}
 	paramContext []logger.ContextArgs
+	level        logger.Level
 
 	writer writer.Writer
 	logger *slog.Logger
@@ -28,6 +29,7 @@ func New(opts ...Option) (l *Logger) {
 		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
 		opts:         &slog.HandlerOptions{},
+		level:        logger.ParseLevel("Info"),
 	}
 	for _, o := range opts {
 		o(l)
@@ -80,6 +82,10 @@ func (l *Logger) Log(c context.Context, level logger.Level, message string, p ..
 	return
 }
 
-func (l *Logger) Err() (err error) {
+func (l *Logger) Error() (err error) {
 	return l.err
+}
+
+func (l *Logger) Level() logger.Level {
+	return l.level
 }

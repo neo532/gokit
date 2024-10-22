@@ -70,7 +70,10 @@ func (h *PrettyHandler) Handle(c context.Context, r slog.Record) error {
 	return nil
 }
 
-func (h *PrettyHandler) Enabled(_ context.Context, l slog.Level) bool {
+func (h *PrettyHandler) Enabled(c context.Context, l slog.Level) (b bool) {
+	if !h.Handler.Enabled(c, l) {
+		return
+	}
 	return true
 }
 

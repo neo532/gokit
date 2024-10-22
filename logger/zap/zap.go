@@ -34,6 +34,8 @@ type Logger struct {
 
 	opts []zap.Option
 	Sync func() error
+
+	level logger.Level
 }
 
 func New(opts ...Option) (l *Logger) {
@@ -41,10 +43,12 @@ func New(opts ...Option) (l *Logger) {
 		paramGlobal:  make([]interface{}, 0, 2),
 		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
+		level:        logger.ParseLevel("Info"),
 		core: zapcore.EncoderConfig{
 			LevelKey:       "level",
 			TimeKey:        "time",
 			CallerKey:      "source",
+			MessageKey:     "message",
 			EncodeLevel:    zapcore.CapitalLevelEncoder,
 			EncodeTime:     zapcore.RFC3339TimeEncoder,
 			EncodeDuration: zapcore.NanosDurationEncoder,
@@ -115,6 +119,10 @@ func (l *Logger) Close() (err error) {
 	return
 }
 
-func (l *Logger) Err() (err error) {
+func (l *Logger) Error() (err error) {
 	return l.err
+}
+
+func (l *Logger) Level() logger.Level {
+	return l.level
 }

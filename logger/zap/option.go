@@ -6,8 +6,10 @@ package zap
  * @date 2023-08-13
  */
 import (
+	"fmt"
 	"io"
 	"os"
+	"runtime"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -20,6 +22,11 @@ type Option func(opt *Logger)
 
 func WithLogger(log *zap.Logger) Option {
 	return func(l *Logger) {
+		// free old
+		if l.logger != nil {
+			l.logger.Sync()
+		}
+
 		l.logger = log
 		return
 	}
@@ -30,6 +37,12 @@ func WithPrettyLogger(w io.Writer) Option {
 		if w == nil {
 			w = os.Stdout
 		}
+
+		// free old
+		if l.logger != nil {
+			l.logger.Sync()
+		}
+
 		l.logger = zap.New(
 			zapcore.NewCore(
 				zapcore.NewJSONEncoder(l.core),
@@ -69,8 +82,13 @@ func WithGlobalParam(kvs ...interface{}) Option {
 
 func WithLevel(lv string) Option {
 	return func(l *Logger) {
+
+		l.level = logger.ParseLevel(lv)
+
+		fmt.Println(fmt.Sprintf("option:\t%+v", l.level))
 		var err error
-		if l.levelEnabler, err = zapcore.ParseLevel(lv); err != nil {
+		if l.levelEnabler, err = zapcore.ParseLevel(l.level.String()); err != nil {
+			fmt.Println(runtime.Caller(0))
 			l.err = err
 			return
 		}
@@ -80,5 +98,10 @@ func WithLevel(lv string) Option {
 func WithWriter(w writer.Writer) Option {
 	return func(l *Logger) {
 		l.writer = w
+	}
+}
+func WithMessageKey(s string) Option {
+	return func(l *Logger) {
+		l.core.MessageKey = s
 	}
 }
