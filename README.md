@@ -9,7 +9,7 @@ Gokit is a toolkit written by Go (Golang).It aims to speed up the development.
 
 ## Contents
 
-- [Gofr Web Framework](#gofr-web-framework)
+- [Gokit](#Gokit)
     - [Installation](#installation)
     - [Usage](#Usage)
         - [Frequency controller](#Frequency-controller)
@@ -22,8 +22,8 @@ Gokit is a toolkit written by Go (Golang).It aims to speed up the development.
         - [Queue](#Queue)
             - [Kafka](#Queue)
         - [Guard panic](#Guard-panic)
-        - [Distributed-lock](#Distributed-lock)
-        - [Page Execute](#Page-Execute)
+        - [Distributed lock](#Distributed-lock)
+        - [Page execute](#Page-execute)
         - [Crypt](#Crypt)
             - [Openssl](#Openssl)
                 - [Cbc](#Cbc)
@@ -147,7 +147,7 @@ It is a frequency with signle instance by redis.
     }
 ```
 
-### Page Execute
+### Page execute
 
 It is a tool to page slice.
 
