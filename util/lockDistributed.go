@@ -12,7 +12,7 @@ import (
 	"errors"
 	"time"
 
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 const evalOk = "ok"
@@ -65,7 +65,10 @@ func NewDistributedLock(d IDistributedLockDb) *DistributedLock {
 		db:       d,
 		duration: time.Duration(50) * time.Millisecond,
 		genCode: func() (s string, err error) {
-			s = uuid.NewString()
+			var id uuid.UUID
+			if id, err = uuid.NewRandom(); err == nil {
+				s = id.String()
+			}
 			return
 		},
 	}
