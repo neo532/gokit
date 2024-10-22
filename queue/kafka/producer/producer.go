@@ -144,7 +144,7 @@ func New(name string, addrs []string, opts ...Option) (pdc *Producer) {
 	return
 }
 
-func (pdc *Producer) Err() error {
+func (pdc *Producer) Error() error {
 	return pdc.err
 }
 

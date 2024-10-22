@@ -13,7 +13,7 @@ import (
 type Producer interface {
 	Send(c context.Context, message interface{}) (err error)
 	Close() func()
-	Err() error
+	Error() error
 }
 
 type Consumer interface {
