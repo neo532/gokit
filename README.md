@@ -210,7 +210,7 @@ It is a tool to exec goroutine safely.
 
 It is a highly scalable logger.
 
-[example](https://github.com/neo532/gokit/blob/master/logger/slog/log_test.go)
+[example](https://github.com/neo532/gokit/blob/master/logger/slog/slog_test.go)
 
 ```go
     package main
