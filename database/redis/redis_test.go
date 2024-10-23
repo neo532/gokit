@@ -16,11 +16,12 @@ import (
 )
 
 func getConfig() (rdbs *Config) {
+	addr := "127.0.0.1:6379"
 	rdbs = &Config{
 		MaxSlowtime: 3 * time.Second,
-		Default:     []*ConnectConfig{{Name: "default", Addr: "127.0.0.1:6379"}},
-		Shadow:      []*ConnectConfig{{Name: "shadow", Addr: "127.0.0.1:6379"}},
-		Gray:        []*ConnectConfig{{Name: "gray", Addr: "127.0.0.1:6379"}},
+		Default:     []*ConnectConfig{{Name: "default", Addr: addr}},
+		Shadow:      []*ConnectConfig{{Name: "shadow", Addr: addr}},
+		Gray:        []*ConnectConfig{{Name: "gray", Addr: addr}},
 	}
 	return
 }
