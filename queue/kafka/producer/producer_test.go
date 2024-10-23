@@ -2,6 +2,7 @@ package producer
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -22,6 +23,7 @@ func TraceID() queue.ProducerMiddleware {
 func TestProducer(t *testing.T) {
 	var err error
 	var pdc queue.Producer
+	c := context.Background()
 
 	name := "default"
 	addrs := []string{"127.0.0.1:9092"}
@@ -32,21 +34,25 @@ func TestProducer(t *testing.T) {
 		//WithAsync(true),
 		WithMiddleware(TraceID()),
 	)
+	defer pdc.Close()
+	if err = pdc.Error(); err != nil {
+		t.Errorf("%s has error[%+v]", t.Name(), err)
+	}
 
-	c := context.Background()
 	msg := struct {
 		MsgID string
 		Tag   string
 		Data  string
 	}{"111", "aaa", "xxx"}
 
-	for i := 0; i < 100000; i++ {
-		time.Sleep(3 * time.Second)
-		err = pdc.Send(c, msg)
-		if err != nil {
+	for i := 0; i < 10; i++ {
+
+		time.Sleep(1 * time.Second)
+
+		if err = pdc.Send(c, msg); err != nil {
 			t.Errorf("%s has error[%+v]", t.Name(), err)
 			return
 		}
 	}
-
+	fmt.Println(t.Name())
 }

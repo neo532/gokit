@@ -9,7 +9,6 @@ package consumergroup
 import (
 	"context"
 	"fmt"
-	"runtime"
 	"testing"
 	"time"
 
@@ -36,21 +35,23 @@ func TestConsumer(t *testing.T) {
 	var csm queue.Consumer
 
 	addr := []string{"127.0.0.1:9092"}
-	csm = NewGroup(
+	if csm, err = NewGroup(
 		"default",
 		addr,
 		"sender",
 		WithTopics("message"),
 		WithHandler(func(ctx context.Context, message []byte) (err error) {
-			fmt.Println(runtime.Caller(0))
+			// do something...
 			return
 		}),
 		WithMiddleware(TraceID()),
-	)
+	); err != nil {
+		t.Errorf("%s has error[%+v]", t.Name(), err)
+	}
 	go func() {
 		for {
 			select {
-			case <-time.After(5 * time.Second):
+			case <-time.After(9 * time.Minute):
 				cancel()
 			}
 		}
@@ -58,6 +59,7 @@ func TestConsumer(t *testing.T) {
 
 	select {
 	case <-c.Done():
+		fmt.Println(t.Name())
 		return
 	default:
 		if err = csm.Start(c); err != nil {

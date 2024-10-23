@@ -50,7 +50,7 @@ func TestOrms(t *testing.T) {
 	dbs, clean, err := initDB()
 	defer clean()
 	if err != nil {
-		t.Error(err)
+		t.Errorf("%s has err[%+v]", t.Name(), err)
 		return
 	}
 
@@ -64,8 +64,8 @@ func TestOrms(t *testing.T) {
 	if err = dbs.Read(c).Raw("show databases").Scan(&databases).Error; err != nil {
 		t.Errorf("%s has err[%+v]", t.Name(), err)
 	}
-	fmt.Println(fmt.Sprintf("dbs:%+v\t%+v", databases, err))
-	time.Sleep(10 * time.Second)
+
+	fmt.Println(t.Name())
 }
 
 func TestTransaction(t *testing.T) {
@@ -73,7 +73,7 @@ func TestTransaction(t *testing.T) {
 	dbs, clean, err := initDB()
 	defer clean()
 	if err != nil {
-		t.Error(err)
+		t.Errorf("%s has err[%+v]", t.Name(), err)
 		return
 	}
 
@@ -89,10 +89,11 @@ func TestTransaction(t *testing.T) {
 		if err = dbs.Read(c).Raw("show databases").Scan(&databases).Error; err != nil {
 			return
 		}
-		fmt.Println(fmt.Sprintf("txdbs:%+v", databases))
 		return
 	})
 	if err != nil {
 		t.Errorf("%s has err[%+v]", t.Name(), err)
 	}
+
+	fmt.Println(t.Name())
 }

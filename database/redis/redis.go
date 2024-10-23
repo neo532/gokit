@@ -26,32 +26,38 @@ type Option func(*Redis)
 
 func WithMaxRetries(i int) Option {
 	return func(o *Redis) {
-		o.RedisOpt.MaxRetries = i
+		o.redisOpt.MaxRetries = i
+		o.optsHash["MaxRetries"] = i
 	}
 }
 func WithReadTimeout(t time.Duration) Option {
 	return func(o *Redis) {
-		o.RedisOpt.ReadTimeout = t
+		o.redisOpt.ReadTimeout = t
+		o.optsHash["ReadTimeout"] = t
 	}
 }
 func WithIdleTimeout(t time.Duration) Option {
 	return func(o *Redis) {
-		o.RedisOpt.IdleTimeout = t
+		o.redisOpt.IdleTimeout = t
+		o.optsHash["IdleTimeout"] = t
 	}
 }
 func WithPoolSize(i int) Option {
 	return func(o *Redis) {
-		o.RedisOpt.PoolSize = i
+		o.redisOpt.PoolSize = i
+		o.optsHash["PoolSize"] = i
 	}
 }
 func WithPassword(s string) Option {
 	return func(o *Redis) {
-		o.RedisOpt.Password = s
+		o.redisOpt.Password = s
+		o.optsHash["Password"] = s
 	}
 }
 func WithDb(i int32) Option {
 	return func(o *Redis) {
-		o.RedisOpt.DB = int(i)
+		o.redisOpt.DB = int(i)
+		o.optsHash["DB"] = i
 		o.redisLogger.Name += fmt.Sprintf("[%d]", i)
 	}
 }
@@ -85,8 +91,9 @@ type Redis struct {
 	bootstrapContext context.Context `json:"-"`
 	key              string          `json:"-"`
 
-	client   *redis.Client  `json:"-"`
-	RedisOpt *redis.Options `json:"redisOpt"`
+	client   *redis.Client          `json:"-"`
+	redisOpt *redis.Options         `json:"-"`
+	optsHash map[string]interface{} `json:"optsHash"`
 }
 
 func New(name string, addr string, opts ...Option) (rdb *Redis) {
@@ -94,7 +101,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 	defer instanceLock.Unlock()
 
 	rdb = &Redis{
-		RedisOpt: &redis.Options{
+		redisOpt: &redis.Options{
 			Addr:        addr,
 			PoolSize:    200,
 			IdleTimeout: 240 * time.Second,
@@ -102,6 +109,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 			MaxRetries:  0,
 		},
 		bootstrapContext: context.Background(),
+		optsHash:         make(map[string]interface{}, 2),
 		redisLogger: &RedisLogger{
 			Name:        name,
 			logger:      logger.NewDefaultILogger(),
@@ -112,7 +120,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 	for _, o := range opts {
 		o(rdb)
 	}
-	if b, e := json.Marshal(rdb); e == nil {
+	if b, e := json.Marshal(rdb.optsHash); e == nil {
 		rdb.key += ":" + fmt.Sprintf("%+x", md5.Sum(b))
 	}
 
@@ -120,7 +128,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 		rdb = r
 		return
 	}
-	rdb.client = redis.NewClient(rdb.RedisOpt)
+	rdb.client = redis.NewClient(rdb.redisOpt)
 	rdb.client.AddHook(rdb.redisLogger)
 
 	if rdb.err = rdb.client.Ping(rdb.bootstrapContext).Err(); rdb.err != nil {

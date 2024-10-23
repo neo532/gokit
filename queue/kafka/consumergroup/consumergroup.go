@@ -30,14 +30,13 @@ type ConsumerGroup struct {
 	topics  []string
 	handler *groupHandler
 
-	err              error
 	goCount          int
 	bootstrapContext context.Context
 
 	consumer sarama.ConsumerGroup
 }
 
-func NewGroup(name string, addrs []string, group string, opts ...Option) (csm *ConsumerGroup) {
+func NewGroup(name string, addrs []string, group string, opts ...Option) (csm *ConsumerGroup, err error) {
 
 	// init parameter
 	csm = &ConsumerGroup{
@@ -64,21 +63,21 @@ func NewGroup(name string, addrs []string, group string, opts ...Option) (csm *C
 	}
 
 	// check
-	if csm.err = csm.conf.Validate(); csm.err != nil {
+	if err = csm.conf.Validate(); err != nil {
 		csm.handler.logger.Error(csm.bootstrapContext, "Validate has error",
 			queue.KeyConfig, csm.conf,
-			queue.KeyErr, csm.err,
+			queue.KeyErr, err,
 		)
 		return
 	}
 
 	// initilize
-	if csm.consumer, csm.err = sarama.NewConsumerGroup(
+	if csm.consumer, err = sarama.NewConsumerGroup(
 		csm.addrs,
 		csm.group,
-		csm.conf); csm.err != nil {
+		csm.conf); err != nil {
 		csm.handler.logger.Error(csm.bootstrapContext, "NewGroup has error!",
-			queue.KeyErr, csm.err,
+			queue.KeyErr, err,
 		)
 		return
 	}

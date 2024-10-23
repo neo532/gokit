@@ -16,12 +16,11 @@ import (
 )
 
 func getConfig() (rdbs *Config) {
-	d := []*ConnectConfig{{Name: "default", Addr: "127.0.0.1:6379"}}
 	rdbs = &Config{
 		MaxSlowtime: 3 * time.Second,
-		Default:     d,
-		Shadow:      d,
-		Gray:        d,
+		Default:     []*ConnectConfig{{Name: "default", Addr: "127.0.0.1:6379"}},
+		Shadow:      []*ConnectConfig{{Name: "shadow", Addr: "127.0.0.1:6379"}},
+		Gray:        []*ConnectConfig{{Name: "gray", Addr: "127.0.0.1:6379"}},
 	}
 	return
 }
@@ -42,23 +41,24 @@ func initRDB() (rdbs *Rediss, clean func(), err error) {
 func TestRediss(t *testing.T) {
 
 	rdbs, clean, err := initRDB()
-	defer clean()
+	defer func() {
+		clean()
+	}()
 	if err != nil {
-		t.Error(err)
+		t.Errorf("%s has err[%+v]", t.Name(), err)
 		return
 	}
 
 	c := context.Background()
 	key := "database.redis.testkey"
-	var r string
-	if r, err = rdbs.Rdb(c).SetEX(c, key, "aaaa", 10*time.Minute).Result(); err != nil {
+	value := "aaaa"
+	if _, err := rdbs.Rdb(c).SetEX(c, key, value, 10*time.Minute).Result(); err != nil {
 		t.Errorf("%s has err[%+v]", t.Name(), err)
 	}
-	fmt.Println(fmt.Sprintf("dbs:%+v\t%+v", r, err))
 
-	if r, err = rdbs.Rdb(c).Get(c, key).Result(); err != nil {
+	if _, err := rdbs.Rdb(c).Get(c, key).Result(); err != nil {
 		t.Errorf("%s has err[%+v]", t.Name(), err)
 	}
-	fmt.Println(fmt.Sprintf("dbs:%+v\t%+v", r, err))
-	time.Sleep(10 * time.Second)
+
+	fmt.Println(t.Name())
 }
