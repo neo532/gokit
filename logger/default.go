@@ -3,6 +3,7 @@ package logger
 import (
 	"context"
 	"fmt"
+	"os"
 )
 
 type DefaultLogger struct {
@@ -104,4 +105,5 @@ func (l *DefaultLogger) Fatal(c context.Context, message string, kvs ...interfac
 		return
 	}
 	l.log.Log(c, LevelFatal, message, append(l.globalArgs, kvs...)...)
+	os.Exit(1)
 }
