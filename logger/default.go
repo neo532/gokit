@@ -74,6 +74,7 @@ func (l *DefaultLogger) Fatalf(c context.Context, format string, kvs ...interfac
 		return
 	}
 	l.log.Log(c, LevelFatal, fmt.Sprintf(format, kvs...), l.globalArgs...)
+	os.Exit(1)
 }
 
 func (l *DefaultLogger) Debug(c context.Context, message string, kvs ...interface{}) {
