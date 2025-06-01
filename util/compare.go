@@ -19,8 +19,6 @@ const (
 	Smaller = -1
 	// Equal is value of compare.It means ver1 is equal with ver2.
 	Equal = 0
-	// Error is value of compare.It means having a error.
-	Error = -2
 )
 
 // CompareVersion returns the num after comparing two versions.
@@ -29,8 +27,7 @@ const (
 //	0: ver1 = ver2, Equal
 //
 // -1: ver1 < ver2, Smaller
-// -2: has error,	Error
-func CompareVersion(ver1, ver2 string) (r int) {
+func CompareVersion(ver1, ver2 string) (r int, err error) {
 
 	v1 := strings.Split(strings.Trim(ver1, "."), ".")
 	v2 := strings.Split(strings.Trim(ver2, "."), ".")
@@ -46,25 +43,27 @@ func CompareVersion(ver1, ver2 string) (r int) {
 		r = Larger
 	}
 
-	var err error
 	var v1i, v2i int
 	for i := 0; i < lMin; i++ {
 		if v1i, err = strconv.Atoi(v1[i]); err != nil {
-			return Error
+			return
 		}
 		if v2i, err = strconv.Atoi(v2[i]); err != nil {
-			return Error
+			return
 		}
 		if v1i < v2i {
-			return Smaller
+			r = Smaller
+			return
 		}
 		if v1i > v2i {
-			return Larger
+			r = Larger
+			return
 		}
 	}
 
 	if diff == 0 {
-		return Equal
+		r = Equal
+		return
 	}
 
 	return

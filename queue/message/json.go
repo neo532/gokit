@@ -11,7 +11,7 @@ import "encoding/json"
 type Json[T any] struct {
 	MsgID string `json:"msgId"`
 	Tag   string `json:"tag"`
-	Data  T      `json:"data"`
+	Value T      `json:"data"`
 }
 
 func NewJson[T any]() *Json[T] {
@@ -20,14 +20,14 @@ func NewJson[T any]() *Json[T] {
 
 func (m *Json[T]) Marshal(msgID string, tag string, data T) (b []byte, err error) {
 	m.MsgID = msgID
-	m.Data = data
+	m.Value = data
 	m.Tag = tag
 	b, err = json.Marshal(m)
 	return
 }
 
 func (m *Json[T]) Data() T {
-	return m.Data
+	return m.Value
 }
 
 func (m *Json[T]) Unmarshal(data []byte) error {

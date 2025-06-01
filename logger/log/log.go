@@ -23,6 +23,7 @@ type Logger struct {
 	err          error
 	paramGlobal  []interface{}
 	paramContext []logger.ContextArgs
+	level        logger.Level
 
 	logger *syslog.Writer
 }
@@ -88,4 +89,8 @@ func (l *Logger) Close() (err error) {
 
 func (l *Logger) Err() (err error) {
 	return l.err
+}
+
+func (l *Logger) Level() logger.Level {
+	return l.level
 }

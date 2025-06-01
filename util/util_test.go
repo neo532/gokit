@@ -13,8 +13,8 @@ import (
 func TestCompareVersion(t *testing.T) {
 
 	cv := func(v1, v2 string, r int) {
-		if v := CompareVersion(v1, v2); v != r {
-			t.Errorf("%s: %s-%s is %d should %d", t.Name(), v1, v2, v, r)
+		if v, err := CompareVersion(v1, v2); err != nil || v != r {
+			t.Errorf("%s: %s-%s is %d should %d,err %+v", t.Name(), v1, v2, v, r, err)
 		}
 	}
 

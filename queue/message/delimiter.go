@@ -12,7 +12,7 @@ type Format struct {
 	delimiter string
 }
 
-func NewFormat() *Delimiter {
+func NewFormat() *Format {
 	return &Format{}
 }
 

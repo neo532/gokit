@@ -13,7 +13,7 @@ type CBC struct {
 	padding string
 	key     []byte
 	iv      []byte
-	coding  crypt.IEncoding
+	coding  crypt.Encoding
 }
 
 type opt func(o *CBC)
@@ -33,7 +33,7 @@ func WithIv(iv string) opt {
 		o.iv = []byte(iv)
 	}
 }
-func WithEncoding(coding crypt.IEncoding) opt {
+func WithEncoding(coding crypt.Encoding) opt {
 	return func(o *CBC) {
 		o.coding = coding
 	}
