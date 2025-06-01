@@ -24,25 +24,25 @@ type testResponse struct {
 }
 
 func TestRequest_Do(t *testing.T) {
-	// 创建测试服务器
+	// Create test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 验证请求方法
+		// Verify request method
 		assert.Equal(t, "POST", r.Method)
 
-		// 验证请求体
+		// Verify request body
 		var req testRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		assert.NoError(t, err)
 		assert.Equal(t, "test", req.Name)
 
-		// 返回响应
+		// Return response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(testResponse{Message: "success"})
 	}))
 	defer server.Close()
 
-	// 创建客户端和请求
+	// Create client and request
 	clt := NewClient()
 	req := NewRequest(clt,
 		WithUrl(server.URL),
@@ -50,7 +50,7 @@ func TestRequest_Do(t *testing.T) {
 		WithContentType("application/json"),
 	)
 
-	// 执行请求
+	// Execute request
 	ctx := context.Background()
 	request := testRequest{Name: "test"}
 	response := &testResponse{}

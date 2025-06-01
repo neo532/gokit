@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// 创建测试用的中间件
+// Create test middleware
 func createMiddleware(id int) Middleware {
 	return func(next Handler) Handler {
 		return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
@@ -16,10 +16,10 @@ func createMiddleware(id int) Middleware {
 }
 
 func TestChain(t *testing.T) {
-	// 创建一个计数器来跟踪中间件的执行顺序
+	// Create a counter to track middleware execution order
 	var executionOrder []int
 
-	// 创建测试用的中间件
+	// Create test middleware
 	createTrackingMiddleware := func(id int) Middleware {
 		return func(next Handler) Handler {
 			return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
@@ -29,9 +29,9 @@ func TestChain(t *testing.T) {
 		}
 	}
 
-	// 创建测试用的处理器
+	// Create test handler
 	handler := func(ctx context.Context, req, reply interface{}) (context.Context, error) {
-		executionOrder = append(executionOrder, 0) // 0 表示处理器
+		executionOrder = append(executionOrder, 0) // 0 represents the handler
 		return ctx, nil
 	}
 
@@ -60,17 +60,17 @@ func TestChain(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// 重置执行顺序
+			// Reset execution order
 			executionOrder = nil
 
-			// 创建中间件链
+			// Create middleware chain
 			chain := Chain(tt.middlewares...)
 
-			// 执行处理器
+			// Execute handler
 			ctx := context.Background()
 			_, err := chain(handler)(ctx, nil, nil)
 
-			// 检查执行顺序
+			// Check execution order
 			if len(executionOrder) != len(tt.expectedOrder) {
 				t.Errorf("execution order length = %v, want %v", len(executionOrder), len(tt.expectedOrder))
 				return
@@ -82,7 +82,7 @@ func TestChain(t *testing.T) {
 				}
 			}
 
-			// 检查错误
+			// Check error
 			if err != tt.expectedError {
 				t.Errorf("error = %v, want %v", err, tt.expectedError)
 			}
@@ -91,7 +91,7 @@ func TestChain(t *testing.T) {
 }
 
 func TestMiddlewareErrorHandling(t *testing.T) {
-	// 创建一个返回错误的中间件
+	// Create middleware that returns an error
 	errorMiddleware := func(err error) Middleware {
 		return func(next Handler) Handler {
 			return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
@@ -100,12 +100,12 @@ func TestMiddlewareErrorHandling(t *testing.T) {
 		}
 	}
 
-	// 创建测试用的处理器
+	// Create test handler
 	handler := func(ctx context.Context, req, reply interface{}) (context.Context, error) {
 		return ctx, nil
 	}
 
-	// 测试错误
+	// Test error
 	testError := errors.New("test error")
 
 	tests := []struct {
@@ -138,7 +138,7 @@ func TestMiddlewareErrorHandling(t *testing.T) {
 }
 
 func TestMiddlewareContextHandling(t *testing.T) {
-	// 创建一个修改上下文的中间件
+	// Create middleware that modifies context
 	contextMiddleware := func(key, value interface{}) Middleware {
 		return func(next Handler) Handler {
 			return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
@@ -148,7 +148,7 @@ func TestMiddlewareContextHandling(t *testing.T) {
 		}
 	}
 
-	// 创建测试用的处理器
+	// Create test handler
 	handler := func(ctx context.Context, req, reply interface{}) (context.Context, error) {
 		return ctx, nil
 	}

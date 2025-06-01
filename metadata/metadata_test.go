@@ -57,25 +57,25 @@ func TestNew(t *testing.T) {
 func TestMetadata_Add(t *testing.T) {
 	md := Metadata{}
 
-	// 测试添加单个值
+	// Test adding single value
 	md.Add("key1", "value1")
 	if got := md["key1"]; len(got) != 1 || got[0] != "value1" {
 		t.Errorf("Add() = %v, want [value1]", got)
 	}
 
-	// 测试添加多个值
+	// Test adding multiple values
 	md.Add("key1", "value2")
 	if got := md["key1"]; len(got) != 2 || got[1] != "value2" {
 		t.Errorf("Add() = %v, want [value1 value2]", got)
 	}
 
-	// 测试空键
+	// Test empty key
 	md.Add("", "value3")
 	if _, exists := md[""]; exists {
 		t.Error("Add() should not add empty key")
 	}
 
-	// 测试大小写不敏感
+	// Test case insensitivity
 	md.Add("KEY1", "value3")
 	if got := md["key1"]; len(got) != 3 || got[2] != "value3" {
 		t.Errorf("Add() = %v, want [value1 value2 value3]", got)
@@ -111,19 +111,19 @@ func TestMetadata_Get(t *testing.T) {
 func TestMetadata_Set(t *testing.T) {
 	md := Metadata{}
 
-	// 测试设置新值
+	// Test setting new value
 	md.Set("key1", "value1")
 	if got := md["key1"]; len(got) != 1 || got[0] != "value1" {
 		t.Errorf("Set() = %v, want [value1]", got)
 	}
 
-	// 测试覆盖现有值
+	// Test overwriting existing value
 	md.Set("key1", "value2")
 	if got := md["key1"]; len(got) != 1 || got[0] != "value2" {
 		t.Errorf("Set() = %v, want [value2]", got)
 	}
 
-	// 测试空键和空值
+	// Test empty key and value
 	md.Set("", "value3")
 	md.Set("key2", "")
 	if _, exists := md[""]; exists {
@@ -174,12 +174,12 @@ func TestMetadata_Clone(t *testing.T) {
 
 	clone := original.Clone()
 
-	// 测试克隆是否成功
+	// Test if clone is successful
 	if len(clone) != len(original) {
 		t.Errorf("Clone() = %v, want %v", clone, original)
 	}
 
-	// 测试修改克隆是否影响原始数据
+	// Test if modifying clone affects original data
 	clone["key1"][0] = "newvalue"
 	if original["key1"][0] == "newvalue" {
 		t.Error("Clone() should create a deep copy")
@@ -192,26 +192,26 @@ func TestContextFunctions(t *testing.T) {
 		"key2": {"value2"},
 	}
 
-	// 测试服务器上下文
+	// Test server context
 	ctx := context.Background()
 	serverCtx := NewServerContext(ctx, md)
 	if got, ok := FromServerContext(serverCtx); !ok || len(got) != len(md) {
 		t.Errorf("FromServerContext() = %v, %v, want %v, true", got, ok, md)
 	}
 
-	// 测试客户端上下文
+	// Test client context
 	clientCtx := NewClientContext(ctx, md)
 	if got, ok := FromClientContext(clientCtx); !ok || len(got) != len(md) {
 		t.Errorf("FromClientContext() = %v, %v, want %v, true", got, ok, md)
 	}
 
-	// 测试 AppendToClientContext
+	// Test AppendToClientContext
 	appendedCtx := AppendToClientContext(ctx, "key3", "value3", "key4", "value4")
 	if got, ok := FromClientContext(appendedCtx); !ok || len(got) != 2 {
 		t.Errorf("AppendToClientContext() = %v, %v, want 2 values, true", got, ok)
 	}
 
-	// 测试 MergeToClientContext
+	// Test MergeToClientContext
 	newMd := Metadata{"key5": {"value5"}}
 	mergedCtx := MergeToClientContext(ctx, newMd)
 	if got, ok := FromClientContext(mergedCtx); !ok || len(got) != 1 {
