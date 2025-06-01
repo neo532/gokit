@@ -1,7 +1,7 @@
 package client
 
 /*
- * @abstract 传输协议http的客户端的操作方法
+ * @abstract The operation method of the client of the transmission protocol http
  * @mail neo532@126.com
  * @date 2022-05-30
  */
