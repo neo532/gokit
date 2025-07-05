@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/neo532/gokit/logger"
-	"github.com/neo532/gokit/logger/writer/lumberjack"
 )
 
 func newSlog() (h logger.Logger) {
@@ -21,18 +20,18 @@ func newSlog() (h logger.Logger) {
 	sp(context.Background())
 
 	l := New(
-		WithWriter(
-			lumberjack.New(
-				lumberjack.WithFilename("./test.log"),
-				lumberjack.WithMaxBackups(2),
-				lumberjack.WithMaxSize(2),
-			),
-		),
+		// WithWriter(
+		// 	lumberjack.New(
+		// 		lumberjack.WithFilename("./test.log"),
+		// 		lumberjack.WithMaxBackups(2),
+		// 		lumberjack.WithMaxSize(2),
+		// 	),
+		// ),
 		WithGlobalParam("a", "b", "1", "2"),
 		WithLevel("info"),
 		WithContextParam(cp, sp),
 		WithReplaceAttr(func() (k string, v interface{}) { return "msg", "" }),
-		//WithPrettyLogger(nil),
+		WithHandler(NewPrettyHandler()),
 	)
 	if err := l.Error(); err != nil {
 		fmt.Println(fmt.Sprintf("err:\t%+v", err))

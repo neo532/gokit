@@ -2,7 +2,6 @@ package slog
 
 import (
 	"log/slog"
-	"os"
 
 	"github.com/neo532/gokit/logger"
 	"github.com/neo532/gokit/logger/writer"
@@ -23,8 +22,8 @@ func WithLogger(log *slog.Logger) Option {
 	}
 }
 
-// WithPrettyLogger should be passed as a parameter at the end of the options.
-func WithPrettyLogger(handler slog.Handler) Option {
+// WithHandler should be passed as a parameter at the end of the options.
+func WithHandler(handler Handler) Option {
 	return func(l *Logger) {
 
 		// free old
@@ -32,13 +31,15 @@ func WithPrettyLogger(handler slog.Handler) Option {
 			l.Close()
 		}
 
-		if handler == nil {
-			l.logger = slog.New(
-				NewPrettyHandler(os.Stdout, l.opts, l.paramContext),
-			).With(l.paramGlobal...)
-			return
-		}
-		l.logger = slog.New(handler).With(l.paramGlobal...)
+		l.handler = handler
+
+		// if handler == nil {
+		// 	l.logger = slog.New(
+		// 		NewPrettyHandler(os.Stdout, l.opts, l.paramContext),
+		// 	).With(l.paramGlobal...)
+		// 	return
+		// }
+		// l.logger = slog.New(handler).With(l.paramGlobal...)
 		return
 	}
 }

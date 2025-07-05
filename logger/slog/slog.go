@@ -2,6 +2,7 @@ package slog
 
 import (
 	"context"
+	"io"
 	"log/slog"
 
 	"github.com/neo532/gokit/logger"
@@ -17,9 +18,10 @@ type Logger struct {
 	paramContext []logger.ContextArgs
 	level        logger.Level
 
-	writer writer.Writer
-	logger *slog.Logger
-	opts   *slog.HandlerOptions
+	writer  writer.Writer
+	logger  *slog.Logger
+	opts    *slog.HandlerOptions
+	handler Handler
 }
 
 func New(opts ...Option) (l *Logger) {
@@ -30,6 +32,7 @@ func New(opts ...Option) (l *Logger) {
 		writer:       stdout.New(),
 		opts:         &slog.HandlerOptions{},
 		level:        logger.ParseLevel(""),
+		handler:      &defaultHandler{},
 	}
 	for _, o := range opts {
 		o(l)
@@ -37,13 +40,16 @@ func New(opts ...Option) (l *Logger) {
 	if l.err != nil {
 		return
 	}
-
 	if l.logger != nil {
 		return
 	}
 
+	// l.logger = slog.New(
+	// 	NewPrettyHandler(os.Stdout, l.opts, l.paramContext),
+	// ).With(l.paramGlobal...)
+
 	l.logger = slog.New(
-		slog.NewJSONHandler(l.writer.Writer(), l.opts),
+		l.handler.NewSlogHandler(l.writer.Writer(), l.opts, l.paramContext),
 	).With(l.paramGlobal...)
 	return
 }
@@ -88,4 +94,24 @@ func (l *Logger) Error() (err error) {
 
 func (l *Logger) Level() logger.Level {
 	return l.level
+}
+
+// ========== handler ==========
+type Handler interface {
+	NewSlogHandler(
+		writer io.Writer,
+		opts *slog.HandlerOptions,
+		contextParam []logger.ContextArgs,
+	) slog.Handler
+}
+
+type defaultHandler struct {
+}
+
+func (dh *defaultHandler) NewSlogHandler(
+	writer io.Writer,
+	opts *slog.HandlerOptions,
+	contextParam []logger.ContextArgs,
+) slog.Handler {
+	return slog.NewJSONHandler(writer, opts)
 }

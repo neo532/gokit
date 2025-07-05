@@ -27,7 +27,7 @@ type Logger struct {
 	writer writer.Writer
 	logger *zap.Logger
 
-	encoder      zapcore.Encoder
+	encoder      Encoder
 	writeSyncer  zapcore.WriteSyncer
 	levelEnabler zapcore.LevelEnabler
 	core         zapcore.EncoderConfig
@@ -55,6 +55,7 @@ func New(opts ...Option) (l *Logger) {
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 			LineEnding:     zapcore.DefaultLineEnding,
 		},
+		encoder: &defaultEncoder{},
 	}
 	for _, o := range opts {
 		o(l)
@@ -69,7 +70,7 @@ func New(opts ...Option) (l *Logger) {
 
 	l.logger = zap.New(
 		zapcore.NewCore(
-			zapcore.NewJSONEncoder(l.core),
+			l.encoder.NewZapEncoder(l.core),
 			zapcore.AddSync(l.writer.Writer()),
 			l.levelEnabler,
 		),
@@ -125,4 +126,16 @@ func (l *Logger) Error() (err error) {
 
 func (l *Logger) Level() logger.Level {
 	return l.level
+}
+
+// ========== Encoder ==========
+type Encoder interface {
+	NewZapEncoder(cfg zapcore.EncoderConfig) zapcore.Encoder
+}
+
+type defaultEncoder struct {
+}
+
+func (dh *defaultEncoder) NewZapEncoder(cfg zapcore.EncoderConfig) zapcore.Encoder {
+	return zapcore.NewJSONEncoder(cfg)
 }

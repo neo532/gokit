@@ -14,22 +14,25 @@ import (
 )
 
 type PrettyHandler struct {
-	slog.Handler
 	l            *log.Logger
 	contextParam []logger.ContextArgs
+	writer       io.Writer
+	opts         *slog.HandlerOptions
 }
 
-func NewPrettyHandler(
-	out io.Writer,
+func NewPrettyHandler() *PrettyHandler {
+	return &PrettyHandler{}
+}
+
+func (h *PrettyHandler) NewSlogHandler(
+	writer io.Writer,
 	opts *slog.HandlerOptions,
 	contextParam []logger.ContextArgs,
-) *PrettyHandler {
-	h := &PrettyHandler{
-		Handler:      slog.NewJSONHandler(out, opts),
-		l:            log.New(out, "", 0),
-		contextParam: contextParam,
-	}
-
+) slog.Handler {
+	h.writer = writer
+	h.opts = opts
+	h.contextParam = contextParam
+	h.l = log.New(writer, "", 0)
 	return h
 }
 
@@ -71,16 +74,16 @@ func (h *PrettyHandler) Handle(c context.Context, r slog.Record) error {
 }
 
 func (h *PrettyHandler) Enabled(c context.Context, l slog.Level) (b bool) {
-	if !h.Handler.Enabled(c, l) {
-		return
-	}
+	// if !h.Handler.Enabled(c, l) {
+	// 	return
+	// }
 	return true
 }
 
 func (h *PrettyHandler) WithAttrs(as []slog.Attr) slog.Handler {
-	return &PrettyHandler{h.Handler, h.l, h.contextParam}
+	return &PrettyHandler{l: h.l, contextParam: h.contextParam}
 }
 
 func (h *PrettyHandler) WithGroup(name string) slog.Handler {
-	return &PrettyHandler{h.Handler, h.l, h.contextParam}
+	return &PrettyHandler{l: h.l, contextParam: h.contextParam}
 }

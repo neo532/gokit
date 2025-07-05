@@ -106,3 +106,9 @@ func WithMessageKey(s string) Option {
 		l.core.MessageKey = s
 	}
 }
+
+func WithEncoder(en Encoder) Option {
+	return func(l *Logger) {
+		l.encoder = en
+	}
+}
