@@ -10,15 +10,20 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 )
 
-var Delimiter = "=========="
-var Grade = 2
+var (
+	DelimiterError    = "==="
+	DelimiterPosition = "---"
+	Grade             = 2
+)
 
 func New(format string, args ...interface{}) error {
 
-	return fmt.Errorf("[%s] %s",
+	return fmt.Errorf("%s%s%s",
 		caller(2),
+		DelimiterPosition,
 		fmt.Sprintf(format, args...),
 	)
 }
@@ -28,8 +33,9 @@ func Wrap(err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("[%s] %w",
+	return fmt.Errorf("%s%s%w",
 		caller(2),
+		DelimiterPosition,
 		err,
 	)
 }
@@ -39,10 +45,12 @@ func Wrapf(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("[%s] %s has error:%w",
-		caller(2),
-		fmt.Sprintf(format, args...),
+	return fmt.Errorf("%w%s%s%s%s",
 		err,
+		DelimiterError,
+		caller(2),
+		DelimiterPosition,
+		fmt.Sprintf(format, args...),
 	)
 }
 
@@ -51,30 +59,40 @@ func WrapError(err, err1 error) error {
 	if err == nil {
 		return err1
 	}
-	return fmt.Errorf("[%s] %w %s %w",
-		caller(2),
-		err1,
-		Delimiter,
+	return fmt.Errorf("%w%s%s%s%w",
 		err,
+		DelimiterError,
+		caller(2),
+		DelimiterPosition,
+		err1,
 	)
 }
 
 func WrapErrorf(err, err1 error, format string, args ...interface{}) error {
 
 	if err == nil {
-		return fmt.Errorf("[%s] %s has error:%w",
-			caller(2),
-			fmt.Sprintf(format, args...),
-			err1,
-		)
+		return Wrapf(err1, format, args...)
 	}
-	return fmt.Errorf("[%s] %s has error:%w %s %w",
-		caller(2),
-		fmt.Sprintf(format, args...),
-		err1,
-		Delimiter,
+	return fmt.Errorf("%w%s%w%s%s%s%s",
 		err,
+		DelimiterError,
+		err1,
+		DelimiterError,
+		caller(2),
+		DelimiterPosition,
+		fmt.Sprintf(format, args...),
 	)
+}
+
+func IsCauseBy(err, err1 error) (b bool) {
+
+	if err == nil || err1 == nil {
+		return
+	}
+	if strings.SplitN(err.Error(), DelimiterError, 2)[0] == err1.Error() {
+		return true
+	}
+	return
 }
 
 func caller(depth int) (r string) {
