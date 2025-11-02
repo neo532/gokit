@@ -66,12 +66,22 @@ func TestWrapErrorf(t *testing.T) {
 	}
 }
 
-func TestIsCause(t *testing.T) {
+func TestIsCauseBy(t *testing.T) {
 
 	err := errors.New("err")
 	err1 := WrapErrorf(err, errors.New("err1"), "format args %d", 1)
 
 	if !IsCauseBy(err1, err) {
+		t.Errorf("%s has err", t.Name())
+	}
+}
+
+func TestCausePurly(t *testing.T) {
+
+	err := New("err")
+	err1 := WrapErrorf(err, errors.New("err1"), "format args %d", 1)
+
+	if CausePurly(err1).Error() != "err" {
 		t.Errorf("%s has err", t.Name())
 	}
 }

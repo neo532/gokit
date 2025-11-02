@@ -95,6 +95,19 @@ func IsCauseBy(err, err1 error) (b bool) {
 	return
 }
 
+func CausePurly(err error) (ep error) {
+
+	if err == nil {
+		return
+	}
+	e := strings.SplitN(err.Error(), DelimiterError, 2)[0]
+	es := strings.Split(e, DelimiterPosition)
+	if l := len(es); l > 0 {
+		return fmt.Errorf(es[l-1])
+	}
+	return fmt.Errorf(e)
+}
+
 func caller(depth int) (r string) {
 
 	_, file, line, ok := runtime.Caller(depth)
