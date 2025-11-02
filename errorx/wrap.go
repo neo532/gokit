@@ -6,6 +6,7 @@ package errorx
  */
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -21,7 +22,7 @@ var (
 
 func New(format string, args ...interface{}) error {
 
-	return fmt.Errorf("%s%s%s",
+	return string2error(
 		caller(2),
 		DelimiterPosition,
 		fmt.Sprintf(format, args...),
@@ -33,10 +34,10 @@ func Wrap(err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("%s%s%w",
+	return string2error(
 		caller(2),
 		DelimiterPosition,
-		err,
+		err.Error(),
 	)
 }
 
@@ -45,8 +46,8 @@ func Wrapf(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("%w%s%s%s%s",
-		err,
+	return string2error(
+		err.Error(),
 		DelimiterError,
 		caller(2),
 		DelimiterPosition,
@@ -59,12 +60,12 @@ func WrapError(err, err1 error) error {
 	if err == nil {
 		return err1
 	}
-	return fmt.Errorf("%w%s%s%s%w",
-		err,
+	return string2error(
+		err.Error(),
 		DelimiterError,
 		caller(2),
 		DelimiterPosition,
-		err1,
+		err1.Error(),
 	)
 }
 
@@ -73,10 +74,13 @@ func WrapErrorf(err, err1 error, format string, args ...interface{}) error {
 	if err == nil {
 		return Wrapf(err1, format, args...)
 	}
-	return fmt.Errorf("%w%s%w%s%s%s%s",
-		err,
+	if err1 == nil {
+		return err
+	}
+	return string2error(
+		err.Error(),
 		DelimiterError,
-		err1,
+		err1.Error(),
 		DelimiterError,
 		caller(2),
 		DelimiterPosition,
@@ -106,6 +110,19 @@ func CausePurly(err error) (ep error) {
 		return fmt.Errorf(es[l-1])
 	}
 	return fmt.Errorf(e)
+}
+
+func string2error(ss ...string) (err error) {
+	l := 0
+	for _, s := range ss {
+		l += len(s)
+	}
+	var builder strings.Builder
+	builder.Grow(l)
+	for _, s := range ss {
+		builder.WriteString(s)
+	}
+	return errors.New(builder.String())
 }
 
 func caller(depth int) (r string) {
