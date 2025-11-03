@@ -28,6 +28,10 @@ end
 return incr
 `
 
+const (
+	DurationToday = "today"
+)
+
 // IFreqDb is the interface for FreqRule.
 type IFreqDb interface {
 	Eval(c context.Context, cmd string, keys []string, args []interface{}) (rst interface{}, err error)
@@ -36,8 +40,10 @@ type IFreqDb interface {
 
 // FreqRule is the instance for FreqRule.
 type FreqRule struct {
-	Duri  string //3|day
+	Duri  string //3|today
 	Times int64
+
+	Timezone *time.Location
 }
 
 // Freq is the instance for FreqRule.
@@ -127,9 +133,12 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 		var key string
 		var expire int64
 		switch r.Duri {
-		case "today":
+		case DurationToday:
 			now := time.Now()
-			tomorrowFirst := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, f.tz)
+			if r.Timezone == nil {
+				r.Timezone = f.tz
+			}
+			tomorrowFirst := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, r.Timezone)
 			key = prekey + now.Format("2006_01_02")
 			expire = int64(tomorrowFirst.Sub(now).Seconds())
 		default:
