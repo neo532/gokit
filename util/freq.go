@@ -56,6 +56,7 @@ type Freq struct {
 func NewFreq(d IFreqDb) *Freq {
 	return &Freq{
 		db: d,
+		tz: time.Local,
 	}
 }
 
