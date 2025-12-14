@@ -2,8 +2,8 @@ package rsa
 
 import (
 	"github.com/forgoer/openssl"
-
-	"github.com/neo532/gokit/crypt"
+	"github.com/neo532/gokit/crypt/crypt"
+	"github.com/neo532/gokit/crypt/encoding"
 	"github.com/neo532/gokit/crypt/encoding/std"
 )
 
@@ -12,7 +12,7 @@ var _ crypt.Crypt = (*RSA)(nil)
 type RSA struct {
 	publicKey  []byte
 	privateKey []byte
-	coding     crypt.Encoding
+	coding     encoding.Encoding
 }
 
 type opt func(o *RSA)
@@ -27,7 +27,7 @@ func WithPrivateKey(priv string) opt {
 		o.privateKey = []byte(priv)
 	}
 }
-func WithEncoding(coding crypt.Encoding) opt {
+func WithEncoding(coding encoding.Encoding) opt {
 	return func(o *RSA) {
 		o.coding = coding
 	}

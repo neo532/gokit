@@ -29,7 +29,9 @@ return incr
 `
 
 const (
-	DurationToday = "today"
+	DurationToday     = "today"
+	DurationThisWeek  = "thisWeek"
+	DurationThisMonth = "thisMonth"
 )
 
 // IFreqDb is the interface for FreqRule.
@@ -130,18 +132,34 @@ func (f *Freq) IncrCheck(c context.Context, pre string, rule ...FreqRule) (bRst 
 
 func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire, times int64) bool) bool {
 	prekey := "freq:" + pre + ":"
+	now := time.Now()
 	for _, r := range ruleList {
 		var key string
 		var expire int64
 		switch r.Duri {
 		case DurationToday:
-			now := time.Now()
 			if r.Timezone == nil {
 				r.Timezone = f.tz
 			}
 			tomorrowFirst := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, r.Timezone)
 			key = prekey + now.Format("2006_01_02")
 			expire = int64(tomorrowFirst.Sub(now).Seconds())
+
+		case DurationThisWeek:
+			if r.Timezone == nil {
+				r.Timezone = f.tz
+			}
+			w, s := f.weekOfYear(now, r.Timezone)
+			key = prekey + DurationThisWeek + strconv.Itoa(w)
+			expire = s
+
+		case DurationThisMonth:
+			if r.Timezone == nil {
+				r.Timezone = f.tz
+			}
+			key = prekey + DurationThisWeek + strconv.Itoa(int(now.Month()))
+			expire = time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, r.Timezone).Unix() - now.Unix()
+
 		default:
 			var err error
 			key = prekey + r.Duri
@@ -155,4 +173,20 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 		}
 	}
 	return true
+}
+
+func (f *Freq) weekOfYear(t time.Time, tz *time.Location) (weekOfYear int, remainSeconds int64) {
+	maxWeekDays := 7
+
+	_, weekOfYear = t.ISOWeek()
+
+	dayOfWeek := int(t.Weekday())
+	if dayOfWeek == 0 {
+		dayOfWeek = maxWeekDays
+	}
+
+	d := t.AddDate(0, 0, maxWeekDays-dayOfWeek+1)
+	d = time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, tz)
+	remainSeconds = d.Unix() - t.Unix()
+	return
 }

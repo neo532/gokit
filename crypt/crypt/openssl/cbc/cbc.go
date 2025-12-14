@@ -3,7 +3,8 @@ package cbc
 import (
 	"github.com/forgoer/openssl"
 
-	"github.com/neo532/gokit/crypt"
+	"github.com/neo532/gokit/crypt/crypt"
+	"github.com/neo532/gokit/crypt/encoding"
 	"github.com/neo532/gokit/crypt/encoding/std"
 )
 
@@ -13,7 +14,7 @@ type CBC struct {
 	padding string
 	key     []byte
 	iv      []byte
-	coding  crypt.Encoding
+	coding  encoding.Encoding
 }
 
 type opt func(o *CBC)
@@ -33,7 +34,7 @@ func WithIv(iv string) opt {
 		o.iv = []byte(iv)
 	}
 }
-func WithEncoding(coding crypt.Encoding) opt {
+func WithEncoding(coding encoding.Encoding) opt {
 	return func(o *CBC) {
 		o.coding = coding
 	}

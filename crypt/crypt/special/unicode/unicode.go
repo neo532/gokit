@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/neo532/gokit/crypt"
+	"github.com/neo532/gokit/crypt/crypt"
 )
 
 var (

@@ -2,8 +2,8 @@ package ecb
 
 import (
 	"github.com/forgoer/openssl"
-
-	"github.com/neo532/gokit/crypt"
+	"github.com/neo532/gokit/crypt/crypt"
+	"github.com/neo532/gokit/crypt/encoding"
 	"github.com/neo532/gokit/crypt/encoding/std"
 )
 
@@ -12,7 +12,7 @@ var _ crypt.Crypt = (*ECB)(nil)
 type ECB struct {
 	padding string
 	key     []byte
-	coding  crypt.Encoding
+	coding  encoding.Encoding
 }
 
 type opt func(o *ECB)
@@ -27,7 +27,7 @@ func WithKey(key string) opt {
 		o.key = []byte(key)
 	}
 }
-func WithEncoding(coding crypt.Encoding) opt {
+func WithEncoding(coding encoding.Encoding) opt {
 	return func(o *ECB) {
 		o.coding = coding
 	}

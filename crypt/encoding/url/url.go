@@ -2,11 +2,10 @@ package url
 
 import (
 	"encoding/base64"
-
-	"github.com/neo532/gokit/crypt"
+	"github.com/neo532/gokit/crypt/encoding"
 )
 
-var _ crypt.Encoding = (*Url)(nil)
+var _ encoding.Encoding = (*Url)(nil)
 
 type Url struct {
 }
