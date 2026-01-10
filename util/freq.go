@@ -132,7 +132,6 @@ func (f *Freq) IncrCheck(c context.Context, pre string, rule ...FreqRule) (bRst 
 
 func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire, times int64) bool) bool {
 	prekey := "freq:" + pre + ":"
-	now := time.Now()
 	for _, r := range ruleList {
 		var key string
 		var expire int64
@@ -141,6 +140,7 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 			if r.Timezone == nil {
 				r.Timezone = f.tz
 			}
+			now := time.Now().In(r.Timezone)
 			tomorrowFirst := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, r.Timezone)
 			key = prekey + now.Format("2006_01_02")
 			expire = int64(tomorrowFirst.Sub(now).Seconds())
@@ -149,6 +149,7 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 			if r.Timezone == nil {
 				r.Timezone = f.tz
 			}
+			now := time.Now().In(r.Timezone)
 			w, s := f.weekOfYear(now, r.Timezone)
 			key = prekey + DurationThisWeek + strconv.Itoa(w)
 			expire = s
@@ -157,6 +158,7 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 			if r.Timezone == nil {
 				r.Timezone = f.tz
 			}
+			now := time.Now().In(r.Timezone)
 			key = prekey + DurationThisWeek + strconv.Itoa(int(now.Month()))
 			expire = time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, r.Timezone).Unix() - now.Unix()
 
