@@ -88,7 +88,7 @@ func TestFreq(t *testing.T) {
 	tz, _ := time.LoadLocation("UTC")
 	rule := []FreqRule{
 		//{Duri: "5", Times: int64(dstTimes)},
-		{Duri: DurationToday, Times: int64(dstTimes), Timezone: tz},
+		{Duri: DurationToday, Times: int64(dstTimes), Timezone: tz, N: 2},
 	}
 
 	count := 10000

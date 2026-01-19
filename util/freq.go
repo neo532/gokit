@@ -46,6 +46,7 @@ type FreqRule struct {
 	Times int64
 
 	Timezone *time.Location
+	N        int
 }
 
 // Freq is the instance for FreqRule.
@@ -144,6 +145,10 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 			tomorrowFirst := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, r.Timezone)
 			key = prekey + now.Format("2006_01_02")
 			expire = int64(tomorrowFirst.Sub(now).Seconds())
+			if n := r.N - 1; n > 0 {
+				key += "_" + strconv.Itoa(r.N)
+				expire += int64(n) * 86400
+			}
 
 		case DurationThisWeek:
 			if r.Timezone == nil {
