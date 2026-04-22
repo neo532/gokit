@@ -165,7 +165,7 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 			}
 			now := time.Now().In(r.Timezone)
 			key = prekey + DurationThisMonth + strconv.Itoa(int(now.Month()))
-			expire = time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, r.Timezone).Unix() - now.Unix()
+			expire = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, r.Timezone).Unix() - now.Unix()
 
 		default:
 			var err error
