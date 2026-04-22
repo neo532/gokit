@@ -91,7 +91,7 @@ func (f *Freq) Check(c context.Context, pre string, rule ...FreqRule) (bRst bool
 			return false
 		}
 
-		if ts, err := strconv.ParseInt(tsOri, 10, 64); err != nil || ts > times {
+		if ts, err := strconv.ParseInt(tsOri, 10, 64); err != nil || ts > times-1 {
 			return false
 		}
 		return true
