@@ -1,0 +1,12 @@
+general:
+  ip: "-"
+  env: dev
+  version: "-"
+  name: github.com/neo532/gofr_layout
+  logger:
+    level: debug
+    filename: ./log/{entry}.log
+    max_size: 10
+    max_backup: 5
+    max_age: 7
+    compress: false
