@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/neo532/gokit/errorx"
 )
 
 const (
@@ -73,7 +73,7 @@ func (g *GoFunc) goWithTimeout(c context.Context, ts time.Duration, fns ...func(
 		defer func() {
 			if r := recover(); r != nil {
 				g.log.Error(c,
-					errors.Errorf("[producer][%+v][%s]", r, string(debug.Stack())),
+					errorx.New("[producer][%+v][%s]", r, string(debug.Stack())),
 				)
 			}
 			for i := 0; i < lRunning; i++ {
@@ -96,7 +96,7 @@ func (g *GoFunc) goWithTimeout(c context.Context, ts time.Duration, fns ...func(
 			select {
 			case <-timer.C:
 				g.log.Error(c,
-					errors.Errorf("Timeout!,goroutines faild to finish within the specified %v", ts),
+					errorx.New("Timeout!,goroutines faild to finish within the specified %v", ts),
 				)
 				return
 			default:
@@ -112,7 +112,7 @@ func (g *GoFunc) goWithTimeout(c context.Context, ts time.Duration, fns ...func(
 				if r := recover(); r != nil {
 
 					g.log.Error(c,
-						errors.Errorf("[%dth][%+v][%s]", index, r, string(debug.Stack())),
+						errorx.New("[%dth][%+v][%s]", index, r, string(debug.Stack())),
 					)
 					// pop taskStatusEnd
 					<-task
@@ -126,7 +126,7 @@ func (g *GoFunc) goWithTimeout(c context.Context, ts time.Duration, fns ...func(
 				}
 
 				if err := fns[index](index); err != nil {
-					g.log.Error(c, errors.Wrapf(err, "[%dth]", index))
+					g.log.Error(c, errorx.Wrapf(err, "[%dth]", index))
 				}
 			}
 		}()

@@ -11,7 +11,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/pkg/errors"
+	"github.com/neo532/gokit/errorx"
 )
 
 type Logger interface {
@@ -28,7 +28,7 @@ func (l *DefaultLogger) Error(c context.Context, err error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	if l.err != nil {
-		l.err = errors.Wrap(l.err, err.Error())
+		l.err = errorx.WrapError(l.err, err)
 		return
 	}
 	l.err = err

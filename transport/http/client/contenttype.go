@@ -26,9 +26,6 @@ func ContentSubtype(contentType string) (subType string) {
 		return
 	}
 	sts := strings.SplitN(cts[1], ";", 2)
-	if len(sts) <= 1 {
-		return
-	}
 	subType = sts[0]
 	return
 }

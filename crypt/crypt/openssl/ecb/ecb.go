@@ -1,7 +1,7 @@
 package ecb
 
 import (
-	"github.com/forgoer/openssl"
+	"github.com/go-think/openssl"
 	"github.com/neo532/gokit/crypt/crypt"
 	"github.com/neo532/gokit/crypt/encoding"
 	"github.com/neo532/gokit/crypt/encoding/std"

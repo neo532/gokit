@@ -31,7 +31,7 @@ func newSlog() (h logger.Logger) {
 		WithLevel("info"),
 		WithContextParam(cp, sp),
 		WithReplaceAttr(func() (k string, v interface{}) { return "msg", "" }),
-		WithHandler(NewPrettyHandler()),
+		// WithHandler(NewPrettyHandler()),
 	)
 	if err := l.Error(); err != nil {
 		fmt.Println(fmt.Sprintf("err:\t%+v", err))

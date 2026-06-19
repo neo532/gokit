@@ -22,8 +22,8 @@ func Reverse(str string) string {
 	return string(runes)
 }
 
-// Ucfirst returns the string,the first letter is upper.
-func Ucfirst(str string) string {
+// UpperFirstChar returns the string,the first letter is upper.
+func UpperFirstChar(str string) string {
 	if len(str) < 1 {
 		return ""
 	}

@@ -3,33 +3,35 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/neo532/gokit)](https://goreportcard.com/report/github.com/neo532/gokit)
 [![Sourcegraph](https://sourcegraph.com/github.com/neo532/gokit/-/badge.svg)](https://sourcegraph.com/github.com/neo532/gokit?badge)
 
-Gokit is a toolkit written by Go (Golang).It aims to speed up the development.
-
+Gokit is a toolkit written by Go (Golang). It aims to speed up the development.
 
 ## Contents
 
 - [Gokit](#Gokit)
-    - [Installation](#installation)
-    - [Usage](#Usage)
-        - [Frequency controller](#Frequency-controller)
-        - [Logger](#Logger)
-            - [Slog](#Slog)
-            - [Zap](#Zap)
-        - [Database](#Database)
-            - [Orm](#Orm)
-            - [Redis](#Redis)
-        - [Queue](#Queue)
-            - [Kafka](#Queue)
-        - [Guard panic](#Guard-panic)
-        - [Distributed lock](#Distributed-lock)
-        - [Page execute](#Page-execute)
-        - [Crypt](#Crypt)
-            - [Openssl](#Openssl)
-                - [Cbc](#Cbc)
-                - [Ecb](#Ecb)
-                - [Rsa](#Rsa)
-
-
+  - [Installation](#installation)
+  - [Usage](#Usage)
+    - [Distributed lock](#Distributed-lock)
+    - [Frequency limiter](#Frequency-limiter)
+    - [Page execute](#Page-execute)
+    - [Guard panic](#Guard-panic)
+    - [Logger](#Logger)
+      - [Slog](#Slog)
+      - [Zap](#Zap)
+    - [Database](#Database)
+      - [Orm](#Orm)
+      - [Redis](#Redis)
+    - [Queue](#Queue)
+      - [Kafka](#Kafka)
+    - [File watcher](#File-watcher)
+    - [Metadata](#Metadata)
+    - [Middleware](#Middleware)
+    - [HTTP client](#HTTP-client)
+    - [Config generator](#Config-generator)
+    - [Crypt](#Crypt)
+      - [Converter](#Crypt-Converter)
+      - [Encoding](#Crypt-Encoding)
+      - [Marshaler](#Crypt-Marshaler)
+      - [Openssl](#Openssl)
 
 ## Installation
 
@@ -38,7 +40,7 @@ To install Gokit package, you need to install Go and set your Go workspace first
 1. The first need [Go](https://golang.google.cn/dl) installed (**version 1.21+ is required**), then you can use the below Go command to install Gokit.
 
 ```sh
-    $ go install github.com/neo532/gokit
+    $ go get github.com/neo532/gokit
 ```
 
 2. Import it in your code:
@@ -49,16 +51,18 @@ To install Gokit package, you need to install Go and set your Go workspace first
 
 ### Distributed lock
 
-It is a distributed lock with signle instance by redis.
+It is a distributed lock with single instance by redis.
 
-[example](https://github.com/neo532/gokit/blob/master/util/lockDistributed.go)
+Also a `NoSpinLock` is provided for local lock without spinning.
+
+[example](https://github.com/neo532/gokit/blob/master/lock/lockDistributed.go)
 
 ```go
     package main
 
     import (
         "github.com/go-redis/redis/v8"
-        "github.com/neo532/gokit/util"
+        "github.com/neo532/gokit/lock"
     )
 
     type RedisOne struct {
@@ -69,22 +73,19 @@ It is a distributed lock with signle instance by redis.
         return l.cache.Eval(c, cmd, keys, args...).Result()
     }
 
-    var Lock *util.Lock
+    var Lock *lock.DistributedLock
 
-    func init(){
-
+    func init() {
         rdb := &RedisOne{
             redis.NewClient(&redis.Options{
                 Addr:     "127.0.0.1:6379",
                 Password: "password",
-            })
+            }),
         }
-
-        Lock = util.NewLock(rdb)
+        Lock = lock.NewDistributedLock(rdb)
     }
 
     func main() {
-
         c := context.Background()
         key := "IamAKey"
         expire := time.Duration(10) * time.Second
@@ -95,18 +96,18 @@ It is a distributed lock with signle instance by redis.
     }
 ```
 
-### Frequency controller
+### Frequency limiter
 
-It is a frequency with signle instance by redis.
+It is a frequency with single instance by redis.
 
-[example](https://github.com/neo532/gokit/blob/master/util/freq.go)
+[example](https://github.com/neo532/gokit/blob/master/limiter/freq.go)
 
 ```go
     package main
 
     import (
         "github.com/go-redis/redis/v8"
-        "github.com/neo532/gokit/util"
+        "github.com/neo532/gokit/limiter"
     )
 
     type RedisOne struct {
@@ -117,28 +118,25 @@ It is a frequency with signle instance by redis.
         return l.cache.Eval(c, cmd, keys, args...).Result()
     }
 
-    var Freq *util.Freq
+    var Freq *limiter.Freq
 
-    func init(){
-
+    func init() {
         rdb := &RedisOne{
             redis.NewClient(&redis.Options{
                 Addr:     "127.0.0.1:6379",
                 Password: "password",
-            })
+            }),
         }
-
-        Freq = util.NewFreq(rdb)
+        Freq = limiter.NewFreq(rdb)
         Freq.Timezone("Local")
     }
 
     func main() {
-
         c := context.Background()
         preKey := "user.test"
-        rule := []util.FreqRule{
-            util.FreqRule{Duri: "10000", Times: 80},
-            util.FreqRule{Duri: "today", Times: 5},
+        rule := []limiter.FreqRule{
+            {Duri: "10000", Times: 80},
+            {Duri: "today", Times: 5},
         }
 
         fmt.Println(Freq.IncrCheck(c, preKey, rule...))
@@ -160,11 +158,10 @@ It is a tool to page slice.
     )
 
     func main() {
-
         arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
         // [1 2 3] [4 5 6] [7 8 9] [10]
-        err := PageExec(int64(len(arr)), 3, func(b, e int64, p int) (err error) {
+        err := util.PageExec(int64(len(arr)), 3, func(b, e int64, p int) (err error) {
             fmt.Println(arr[b:e])
             return
         })
@@ -185,23 +182,22 @@ It is a tool to exec goroutine safely.
     )
 
     func main() {
+        fn := func(i int) (err error) {
+            // do something...
+            return
+        }
 
-		fn := func(i int) (err error) {
-			// do something...
-			return
-		}
+        log := &gofunc.DefaultLogger{}
+        gofn := gofunc.NewGoFunc(gofunc.WithLogger(log), gofunc.WithMaxGoroutine(20))
 
-		log := &gofunc.DefaultLogger{}
-		gofn := gofunc.NewGoFunc(gofunc.WithLogger(log), gofunc.WithMaxGoroutine(20))
+        l := 1000000
+        fns := make([]func(i int) error, 0, l)
+        for i := 0; i < l; i++ {
+            fns = append(fns, fn)
+        }
 
-		l := 1000000
-		fns := make([]func(i int) error, 0, l)
-		for i := 0; i < l; i++ {
-			fns = append(fns, fn)
-		}
-
-		gofn.WithTimeout(c, time.Second*2, fns...)
-		err := log.Err()
+        gofn.WithTimeout(c, time.Second*2, fns...)
+        err := log.Err()
     }
 ```
 
@@ -219,7 +215,6 @@ It is a highly scalable logger.
     )
 
     func main() {
-
         c := context.Background()
         var l logger.Logger
         l = newSlog() // more detail in test file
@@ -245,7 +240,6 @@ A well-encapsulated GORM that can support shadow databases, hot configuration up
     )
 
     func main() {
-
         db, clean, err := initDB() // more detail in test file
         defer clean()
         if err != nil {
@@ -254,7 +248,6 @@ A well-encapsulated GORM that can support shadow databases, hot configuration up
 
         c := context.Background()
         err = db.Transaction(c, func(c context.Context) (err error) {
-
             var databases []string
 
             if err = dbs.Write(c).Raw("show databases").Scan(&databases).Error; err != nil {
@@ -268,7 +261,6 @@ A well-encapsulated GORM that can support shadow databases, hot configuration up
         })
     }
 ```
-
 
 ### Redis
 
@@ -290,4 +282,163 @@ A message queue client with high scalability that supports the full-link connect
 
 ```go
     // more detail in test file
+```
+
+### File watcher
+
+A file watcher that monitors a directory for file changes, delivering both initial state and subsequent updates.
+
+[example](https://github.com/neo532/gokit/blob/master/filepath/file_test.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/filepath"
+    )
+
+    func main() {
+        w := filepath.New("/path/to/watch")
+
+        // Watch delivers initial state for all existing files,
+        // then async updates on writes/creates.
+        err := w.Watch(ctx, func(fileName string, data []byte) error {
+            fmt.Println(fileName, string(data))
+            return nil
+        })
+    }
+```
+
+### Metadata
+
+Metadata is a way of representing request headers internally, used at the RPC level to translate back and forth from transport headers.
+
+[example](https://github.com/neo532/gokit/blob/master/metadata/metadata_test.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/metadata"
+    )
+
+    func main() {
+        md := metadata.New(map[string][]string{
+            "authorization": {"token123"},
+        })
+
+        ctx := metadata.NewClientContext(context.Background(), md)
+
+        // Append more key-values later
+        ctx = metadata.AppendToClientContext(ctx, "x-request-id", "req-123")
+
+        md, ok := metadata.FromClientContext(ctx)
+    }
+```
+
+### Middleware
+
+HTTP/gRPC transport middleware with a chain helper.
+
+[example](https://github.com/neo532/gokit/blob/master/middleware/middleware_test.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/middleware"
+    )
+
+    func logging() middleware.Middleware {
+        return func(next middleware.Handler) middleware.Handler {
+            return func(c context.Context, request, reply interface{}) (context.Context, error) {
+                log.Println("before")
+                c, err := next(c, request, reply)
+                log.Println("after")
+                return c, err
+            }
+        }
+    }
+
+    func main() {
+        chain := middleware.Chain(logging(), recovery())
+        chain(func(c context.Context, request, reply interface{}) (context.Context, error) {
+            // handler logic
+            return c, nil
+        })(ctx, req, &reply)
+    }
+```
+
+### HTTP client
+
+A feature-rich HTTP client with middleware chain, connection pool management, TLS configuration, retry, and logging support.
+
+[example](https://github.com/neo532/gokit/blob/master/transport/http/client/request.go)
+
+```go
+    package main
+
+    import (
+        "github.com/neo532/gokit/transport/http/client"
+    )
+
+    func main() {
+        c := client.NewClient(
+            client.WithLogger(myLogger),
+            client.WithDefaultRetryTimes(3),
+            client.WithDefaultTimeLimit(5*time.Second),
+            client.WithMaxConnsPerHost(10),
+            client.WithInsecureSkipVerify(true),
+        )
+        // Use c.HttpClient() to make requests
+    }
+```
+
+### Config generator
+
+A tool to generate Go struct definitions from configuration files (JSON, YAML, INI).
+
+[example](https://github.com/neo532/gokit/blob/master/cmd/config-gen-go-struct/main.go)
+
+```sh
+    $ go run github.com/neo532/gokit/cmd/config-gen-go-struct -f config.yaml
+```
+
+### Crypt
+
+Crypt provides a comprehensive cryptography suite including encryption/decryption, encoding, data conversion, and serialization.
+
+#### Converter
+
+Convert data between different formats and types.
+
+[example](https://github.com/neo532/gokit/blob/master/crypt/converter/converter.go)
+
+#### Encoding
+
+Encoding and decoding support for standard and URL-safe formats.
+
+[example](https://github.com/neo532/gokit/blob/master/crypt/encoding/encoding.go)
+
+#### Marshaler
+
+Marshal and unmarshal data with JSON and XML support.
+
+[example](https://github.com/neo532/gokit/blob/master/crypt/marshaler/marshaler.go)
+
+#### Openssl
+
+Openssl-compatible encryption implementations.
+
+- **CBC** — Cipher block chaining mode
+- **ECB** — Electronic codebook mode
+- **RSA** — RSA encryption and signing
+
+[example](https://github.com/neo532/gokit/blob/master/crypt/crypt/openssl/cbc/cbc.go)
+
+```go
+    import (
+        "github.com/neo532/gokit/crypt/crypt/openssl/cbc"
+        "github.com/neo532/gokit/crypt/crypt/openssl/rsa"
+    )
 ```
