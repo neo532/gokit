@@ -1,10 +1,10 @@
 module github.com/neo532/gokit/crypt/marshaler/json
 
-go 1.23.2
+go 1.23.1
 
 require (
 	github.com/golang/protobuf v1.5.4
-	github.com/neo532/gokit v1.0.43
+	github.com/neo532/gokit v1.0.45
 	google.golang.org/protobuf v1.36.6
 )
 

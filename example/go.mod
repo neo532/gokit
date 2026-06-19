@@ -1,12 +1,12 @@
 module github.com/neo532/gokit/example
 
-go 1.23.2
+go 1.23.1
 
 replace github.com/neo532/gokit => ..
 
 require (
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/neo532/gokit v1.0.43
+	github.com/neo532/gokit v1.0.45
 	github.com/stretchr/testify v1.8.4
 )
 
