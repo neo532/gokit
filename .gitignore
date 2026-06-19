@@ -5,4 +5,4 @@
 .fsw.yml
 .claude
 
-/config-gen-go-struct
+config-gen-go-struct
