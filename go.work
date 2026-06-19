@@ -1,0 +1,16 @@
+go 1.26.1
+
+use (
+	.
+	./crypt/crypt/openssl
+	./crypt/marshaler/json
+	./example
+	./logger/zap
+	./queue/kafka
+	./lock
+	./logger/writer/lumberjack
+	./filepath
+	./database/redis
+	./database/orm
+	./cmd
+)
