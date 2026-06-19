@@ -1,3 +1,3 @@
 module github.com/neo532/gokit
 
-go 1.26.1
+go 1.23.2

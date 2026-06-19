@@ -1,10 +1,10 @@
 module github.com/neo532/gokit/crypt/crypt/openssl
 
-go 1.26.1
+go 1.23.2
 
 require (
 	github.com/go-think/openssl v1.20.0
-	github.com/neo532/gokit v1.0.40
+	github.com/neo532/gokit v1.0.43
 )
 
 replace github.com/neo532/gokit => ../../..

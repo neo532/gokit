@@ -1,6 +1,6 @@
 module github.com/neo532/gokit/filepath
 
-go 1.26.1
+go 1.23.2
 
 require github.com/fsnotify/fsnotify v1.10.1
 

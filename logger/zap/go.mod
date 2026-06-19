@@ -1,10 +1,10 @@
 module github.com/neo532/gokit/logger/zap
 
-go 1.26.1
+go 1.23.2
 
 require (
-	github.com/neo532/gokit v0.0.0-00010101000000-000000000000
-	github.com/neo532/gokit/logger/writer/lumberjack v0.0.0-00010101000000-000000000000
+	github.com/neo532/gokit v1.0.43
+	github.com/neo532/gokit/logger/writer/lumberjack v1.0.43
 	github.com/pkg/errors v0.9.1
 	go.uber.org/zap v1.28.0
 )

@@ -1,12 +1,12 @@
 module github.com/neo532/gokit/database/redis
 
-go 1.26.1
+go 1.23.2
 
 replace github.com/neo532/gokit => ../..
 
 require (
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/neo532/gokit v0.0.0-00010101000000-000000000000
+	github.com/neo532/gokit v1.0.43
 )
 
 require (

@@ -1,10 +1,10 @@
 module github.com/neo532/gokit/queue/kafka
 
-go 1.26.1
+go 1.25.0
 
 require (
 	github.com/IBM/sarama v1.50.3
-	github.com/neo532/gokit v0.0.0-00010101000000-000000000000
+	github.com/neo532/gokit v1.0.43
 )
 
 require (

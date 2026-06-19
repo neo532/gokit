@@ -1,11 +1,11 @@
 module github.com/neo532/gokit/database/orm
 
-go 1.26.1
+go 1.23.2
 
 replace github.com/neo532/gokit => ../..
 
 require (
-	github.com/neo532/gokit v0.0.0-00010101000000-000000000000
+	github.com/neo532/gokit v1.0.43
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )
