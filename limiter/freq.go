@@ -91,7 +91,7 @@ func (f *Freq) Check(c context.Context, pre string, rule ...FreqRule) (bRst bool
 			return false
 		}
 
-		if ts, err := strconv.ParseInt(tsOri, 10, 64); err != nil || ts > times {
+		if ts, err := strconv.ParseInt(tsOri, 10, 64); err != nil || ts > times-1 {
 			return false
 		}
 		return true
@@ -164,8 +164,8 @@ func (f *Freq) freq(pre string, ruleList []FreqRule, fn func(key string, expire,
 				r.Timezone = f.tz
 			}
 			now := time.Now().In(r.Timezone)
-			key = prekey + DurationThisWeek + strconv.Itoa(int(now.Month()))
-			expire = time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, r.Timezone).Unix() - now.Unix()
+			key = prekey + DurationThisMonth + strconv.Itoa(int(now.Month()))
+			expire = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, r.Timezone).Unix() - now.Unix()
 
 		default:
 			var err error
