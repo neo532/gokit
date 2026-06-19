@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/IBM/sarama v1.50.3
-	github.com/neo532/gokit v1.0.40
+	github.com/neo532/gokit v0.0.0-00010101000000-000000000000
 )
 
 require (
