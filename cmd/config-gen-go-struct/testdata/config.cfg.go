@@ -6,6 +6,7 @@ import "gopkg.in/yaml.v3"
 
 // Config holds all application configuration sections.
 type Config struct {
+	ConfigA
 	ConfigData
 	ConfigGeneral
 	ConfigServer
@@ -25,6 +26,8 @@ func Load(c *Config, name string, data []byte) error {
 		return err
 	}
 	switch name {
+	case "a.json":
+		loadConfigA(raw, &c.ConfigA)
 	case "data.yaml":
 		loadConfigData(raw, &c.ConfigData)
 	case "general.yaml":

@@ -12,6 +12,7 @@ func main() {
 	pkg := flag.String("pkg", "config", "package name")
 	typeName := flag.String("type", "Config", "top-level struct name")
 	split := flag.Bool("split", false, "split output into one file per top-level section")
+	formatFlag := flag.String("format", "yaml", "file formats to process, comma-separated (yaml, json, ini; default: yaml)")
 	flag.Parse()
 
 	args := flag.Args()
@@ -20,7 +21,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	// If any arg is a directory, expand it to top-level .yaml/.yml files
+	// Parse format flag into allowed extensions
+	formatRaw := *formatFlag
+	if formatRaw == "" {
+		formatRaw = "yaml"
+	}
+	formatList := strings.Split(formatRaw, ",")
+	extSet := map[string]bool{}
+	for _, f := range formatList {
+		f = strings.TrimSpace(f)
+		switch f {
+		case "yaml":
+					extSet[".yaml"] = true
+			extSet[".yml"] = true
+		case "json":
+				extSet[".json"] = true
+		case "ini":
+				extSet[".ini"] = true
+		default:
+			fmt.Fprintf(os.Stderr, "unknown format: %s\n", f)
+			os.Exit(1)
+		}
+	}
+	// Determine format override for struct tags: single format → use it; multiple → auto-detect per file
+	formatOverride := ""
+	if len(formatList) == 1 {
+		formatOverride = formatList[0]
+	}
+
+	// If any arg is a directory, expand it to top-level config files (.yaml/.yml/.json/.ini)
 	var expanded []string
 	for _, a := range args {
 		fi, err := os.Stat(a)
@@ -31,7 +60,7 @@ func main() {
 					continue
 				}
 				ext := filepath.Ext(de.Name())
-				if ext == ".yaml" || ext == ".yml" {
+				if extSet[ext] {
 					expanded = append(expanded, filepath.Join(a, de.Name()))
 				}
 			}
@@ -41,11 +70,22 @@ func main() {
 	}
 	args = expanded
 
+	// Check for duplicate base names (e.g. a.yaml and a.json)
+	seen := map[string]string{}
+	for _, a := range args {
+		base := stripExt(filepath.Base(a))
+		if first, ok := seen[base]; ok {
+			fmt.Fprintf(os.Stderr, "error: %s and %s produce the same base name %q\n", first, a, base)
+			os.Exit(1)
+		}
+		seen[base] = a
+	}
+
 	// Detect multi-file mode: all args are config files (end with .yaml/.yml/.json/.ini)
 	allConfig := true
 	for _, a := range args {
 		ext := filepath.Ext(a)
-		if ext != ".yaml" && ext != ".yml" && ext != ".json" && ext != ".ini" {
+		if !extSet[ext] {
 			allConfig = false
 			break
 		}
@@ -55,7 +95,7 @@ func main() {
 		// Multi-file mode: each input generates its own .go file
 		var entries []unifiedEntry
 		for _, input := range args {
-			generateOne(*pkg, input, *split, *typeName)
+			generateOne(*pkg, input, *split, *typeName, formatOverride)
 			pascalBase := toPascal(stripExt(filepath.Base(input)))
 			entries = append(entries, unifiedEntry{
 				structName: *typeName + pascalBase,
@@ -84,7 +124,10 @@ func main() {
 
 	ng := newNameGen()
 	fields := inferFields(raw, ng, "")
-	format := detectFormat(input)
+	format := formatOverride
+	if format == "" {
+		format = detectFormat(input)
+	}
 
 	// Auto-split when output path doesn't end with .go
 	autoSplit := false
@@ -135,7 +178,7 @@ func main() {
 	fmt.Fprintf(os.Stderr, "generated %s\n", out)
 }
 
-func generateOne(pkg, input string, split bool, typeSuffix string) {
+func generateOne(pkg, input string, split bool, typeSuffix string, formatOverride string) {
 	raw, err := readConfig(input)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "read %s: %v\n", input, err)
@@ -144,7 +187,10 @@ func generateOne(pkg, input string, split bool, typeSuffix string) {
 
 	base := stripExt(filepath.Base(input))
 	pascalBase := toPascal(base)
-	format := detectFormat(input)
+	format := formatOverride
+	if format == "" {
+		format = detectFormat(input)
+	}
 	out := filepath.Join(filepath.Dir(input), base+".cfg.go")
 
 	ng := newNameGen()
@@ -152,7 +198,7 @@ func generateOne(pkg, input string, split bool, typeSuffix string) {
 
 	if split {
 		filePrefix := base
-			files := generateSplit(pkg, typeSuffix+pascalBase, fields, filepath.Base(input), format, filePrefix)
+		files := generateSplit(pkg, typeSuffix+pascalBase, fields, filepath.Base(input), format, filePrefix)
 		for name, code := range files {
 			path := filepath.Join(filepath.Dir(input), name)
 			if err := os.WriteFile(path, []byte(code), 0644); err != nil {

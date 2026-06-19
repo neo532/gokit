@@ -14,7 +14,7 @@ func generate(pkg, typeName, loadName string, fields []fieldInfo, srcFile, forma
 	genImports(&b, format)
 
 	genStructs := map[string]bool{}
-	genStruct(&b, typeName, fields, 0, genStructs)
+	genStruct(&b, typeName, fields, 0, genStructs, format)
 
 	b.WriteString("// Load parses config data and populates " + typeName + ".\n")
 	b.WriteString("// If c is nil, a new " + typeName + " is created.\n")
@@ -126,7 +126,7 @@ func genImportsSplit(b *strings.Builder, format string) {
 	}
 }
 
-func genStruct(b *strings.Builder, name string, fields []fieldInfo, depth int, generated map[string]bool) {
+func genStruct(b *strings.Builder, name string, fields []fieldInfo, depth int, generated map[string]bool, format string) {
 	if generated[name] {
 		return
 	}
@@ -135,7 +135,7 @@ func genStruct(b *strings.Builder, name string, fields []fieldInfo, depth int, g
 
 	for _, f := range fields {
 		if f.IsStruct {
-			genStruct(b, f.StructType, f.Children, depth, generated)
+			genStruct(b, f.StructType, f.Children, depth, generated, format)
 		}
 	}
 
@@ -147,7 +147,7 @@ func genStruct(b *strings.Builder, name string, fields []fieldInfo, depth int, g
 
 	fmt.Fprintf(b, "%stype %s struct {\n", indent, name)
 	for _, f := range fields {
-		tag := fmt.Sprintf("`yaml:%q`", f.Key)
+		tag := fmt.Sprintf("`%s:%q`", format, f.Key)
 		fmt.Fprintf(b, "%s\t%s %s %s // %s\n", indent, f.Name, f.AtomicType, tag, f.GoType)
 	}
 	fmt.Fprintf(b, "%s}\n\n", indent)
@@ -203,7 +203,7 @@ func generateSplit(pkg, typeName string, fields []fieldInfo, srcFile, format, ba
 		buf.WriteString("package " + pkg + "\n\n")
 		buf.WriteString("import \"sync/atomic\"\n\n")
 
-		genStruct(buf, sf.StructType, sf.Children, 0, map[string]bool{})
+		genStruct(buf, sf.StructType, sf.Children, 0, map[string]bool{}, format)
 		genLoadFunc(buf, sf.StructType, sf.Children, map[string]bool{})
 
 		sectionName := strings.ToLower(sf.Name)
@@ -217,9 +217,9 @@ func generateSplit(pkg, typeName string, fields []fieldInfo, srcFile, format, ba
 	genImportsSplit(mainBuf, format)
 
 	if len(sections) > 0 {
-		genStructShallow(mainBuf, typeName, fields, 0, map[string]bool{})
+		genStructShallow(mainBuf, typeName, fields, 0, map[string]bool{}, format)
 	} else {
-		genStruct(mainBuf, typeName, fields, 0, map[string]bool{})
+		genStruct(mainBuf, typeName, fields, 0, map[string]bool{}, format)
 	}
 
 	mainBuf.WriteString("// Load parses config data and populates " + typeName + ".\n")
@@ -244,7 +244,7 @@ func generateSplit(pkg, typeName string, fields []fieldInfo, srcFile, format, ba
 	return files
 }
 
-func genStructShallow(b *strings.Builder, name string, fields []fieldInfo, depth int, generated map[string]bool) {
+func genStructShallow(b *strings.Builder, name string, fields []fieldInfo, depth int, generated map[string]bool, format string) {
 	if generated[name] || len(fields) == 0 {
 		return
 	}
@@ -253,7 +253,7 @@ func genStructShallow(b *strings.Builder, name string, fields []fieldInfo, depth
 	indent := strings.Repeat("\t", depth)
 	fmt.Fprintf(b, "%stype %s struct {\n", indent, name)
 	for _, f := range fields {
-		tag := fmt.Sprintf("`yaml:%q`", f.Key)
+		tag := fmt.Sprintf("`%s:%q`", format, f.Key)
 		fmt.Fprintf(b, "%s\t%s %s %s // %s\n", indent, f.Name, f.AtomicType, tag, f.GoType)
 	}
 	fmt.Fprintf(b, "%s}\n\n", indent)
