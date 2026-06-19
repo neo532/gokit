@@ -20,6 +20,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	// If any arg is a directory, expand it to top-level .yaml/.yml files
+	var expanded []string
+	for _, a := range args {
+		fi, err := os.Stat(a)
+		if err == nil && fi.IsDir() {
+			entries, _ := os.ReadDir(a)
+			for _, de := range entries {
+				if de.IsDir() {
+					continue
+				}
+				ext := filepath.Ext(de.Name())
+				if ext == ".yaml" || ext == ".yml" {
+					expanded = append(expanded, filepath.Join(a, de.Name()))
+				}
+			}
+		} else {
+			expanded = append(expanded, a)
+		}
+	}
+	args = expanded
+
 	// Detect multi-file mode: all args are config files (end with .yaml/.yml/.json/.ini)
 	allConfig := true
 	for _, a := range args {
@@ -30,7 +51,7 @@ func main() {
 		}
 	}
 
-	if allConfig && len(args) >= 2 {
+	if allConfig && len(args) >= 1 {
 		// Multi-file mode: each input generates its own .go file
 		var entries []unifiedEntry
 		for _, input := range args {
@@ -44,7 +65,7 @@ func main() {
 		}
 		// Generate unified config.go aggregating all sections
 		code := generateUnified(*pkg, *typeName, entries)
-		out := filepath.Join(filepath.Dir(args[0]), "config.go")
+		out := filepath.Join(filepath.Dir(args[0]), "config.cfg.go")
 		if err := os.WriteFile(out, []byte(code), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "write %s: %v\n", out, err)
 			os.Exit(1)
@@ -105,7 +126,7 @@ func main() {
 		out = args[1]
 	}
 	if out == "" {
-		out = changeExt(input, ".go")
+		out = filepath.Join(filepath.Dir(input), "config.go")
 	}
 	if err := os.WriteFile(out, []byte(code), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "write %s: %v\n", out, err)
@@ -124,13 +145,14 @@ func generateOne(pkg, input string, split bool, typeSuffix string) {
 	base := stripExt(filepath.Base(input))
 	pascalBase := toPascal(base)
 	format := detectFormat(input)
-	out := changeExt(input, ".go")
+	out := filepath.Join(filepath.Dir(input), base+".cfg.go")
 
 	ng := newNameGen()
 	fields := inferFields(raw, ng, pascalBase)
 
 	if split {
-		files := generateSplit(pkg, typeSuffix+pascalBase, fields, filepath.Base(input), format, base)
+		filePrefix := base
+			files := generateSplit(pkg, typeSuffix+pascalBase, fields, filepath.Base(input), format, filePrefix)
 		for name, code := range files {
 			path := filepath.Join(filepath.Dir(input), name)
 			if err := os.WriteFile(path, []byte(code), 0644); err != nil {

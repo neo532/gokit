@@ -207,7 +207,7 @@ func generateSplit(pkg, typeName string, fields []fieldInfo, srcFile, format, ba
 		genLoadFunc(buf, sf.StructType, sf.Children, map[string]bool{})
 
 		sectionName := strings.ToLower(sf.Name)
-		files[baseName+"_"+sectionName+".go"] = buf.String()
+		files[baseName+"_"+sectionName+".cfg.go"] = buf.String()
 	}
 
 	// Main file
@@ -240,7 +240,7 @@ func generateSplit(pkg, typeName string, fields []fieldInfo, srcFile, format, ba
 	genLoadFuncShallow(mainBuf, typeName, fields, map[string]bool{})
 	genDecoder(mainBuf, format)
 
-	files[baseName+".go"] = mainBuf.String()
+	files[baseName+".cfg.go"] = mainBuf.String()
 	return files
 }
 

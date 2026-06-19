@@ -3,5 +3,6 @@
 .DS_Store
 *.sw[op]
 .fsw.yml
+.claude
 
 /config-gen-go-struct
