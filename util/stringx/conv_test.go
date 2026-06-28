@@ -87,3 +87,9 @@ func TestAtof(t *testing.T) {
 		t.Error("Atof(abc) expected error")
 	}
 }
+
+func TestFtoaTrunc(t *testing.T) {
+	if got := FtoaTrunc(3.14159); got != "3.14" {
+		t.Errorf("Ftoa(3.14159) = %q", got)
+	}
+}

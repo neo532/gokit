@@ -42,10 +42,10 @@ func Ftoa(f float64, prec ...int) string {
 }
 
 // FtoaTrunc converts float64 to decimal string, truncating without rounding.
-func FtoaTrunc(num float64, decimal int) string {
-	d := float64(1)
-	if decimal > 0 {
-		d = math.Pow10(decimal)
+func FtoaTrunc(num float64, prec ...int) string {
+	d := float64(100)
+	if len(prec) > 0 {
+		d = math.Pow10(prec[0])
 	}
 	return strconv.FormatFloat(math.Trunc(num*d)/d, 'f', -1, 64)
 }
