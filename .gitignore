@@ -7,3 +7,4 @@
 
 /config-gen-go-struct
 /cmd/config-gen-go-struct/config-gen-go-struct
+/cmd/wire-gen-go-provider/wire-gen-go-provider

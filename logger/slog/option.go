@@ -44,7 +44,7 @@ func WithHandler(handler Handler) Option {
 	}
 }
 
-func WithReplaceAttr(fns ...func() (k string, v interface{})) Option {
+func WithReplaceAttr(fns ...func() (k string, v any)) Option {
 	return func(l *Logger) {
 		l.opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
 			for _, fn := range fns {
@@ -69,7 +69,7 @@ func WithContextParam(fns ...logger.ContextArgs) Option {
 	}
 }
 
-func WithGlobalParam(vs ...interface{}) Option {
+func WithGlobalParam(vs ...any) Option {
 	return func(l *Logger) {
 		l.paramGlobal = vs
 	}

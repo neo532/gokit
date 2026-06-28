@@ -26,7 +26,6 @@ func Connect(c context.Context, cfg *Config, dsn *DsnConfig, logger logger.ILogg
 		WithSingularTable(),
 		WithContext(c),
 		WithSlowLog(cfg.MaxSlowtime),
-		WithRecordNotFoundError(cfg.RecordNotFoundError),
 	)
 }
 

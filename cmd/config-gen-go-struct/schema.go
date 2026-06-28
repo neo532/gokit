@@ -7,11 +7,40 @@ import (
 )
 
 type nameGen struct {
-	used map[string]bool
+	used       map[string]bool
+	structDefs map[string][]fieldInfo // accumulated fields per struct type (union merge)
 }
 
 func newNameGen() *nameGen {
-	return &nameGen{used: map[string]bool{}}
+	return &nameGen{
+		used:       map[string]bool{},
+		structDefs: map[string][]fieldInfo{},
+	}
+}
+
+// mergeStruct accumulates fields for a struct type, returning the union of all
+// occurrences. When the same _-prefixed struct key appears in multiple places
+// (e.g. database_user._database_conf and database_biz._database_conf), this
+// ensures the generated struct has all fields from every occurrence.
+func (g *nameGen) mergeStruct(structType string, fields []fieldInfo) []fieldInfo {
+	existing, ok := g.structDefs[structType]
+	if !ok {
+		g.structDefs[structType] = fields
+		g.used[structType] = true
+		return fields
+	}
+	existingKeys := map[string]bool{}
+	for _, f := range existing {
+		existingKeys[f.Key] = true
+	}
+	for _, f := range fields {
+		if !existingKeys[f.Key] {
+			existing = append(existing, f)
+		}
+	}
+	sort.Slice(existing, func(i, j int) bool { return existing[i].Key < existing[j].Key })
+	g.structDefs[structType] = existing
+	return existing
 }
 
 func (g *nameGen) unique(base string) string {
@@ -26,14 +55,6 @@ func (g *nameGen) unique(base string) string {
 			return c
 		}
 	}
-}
-
-func (g *nameGen) seen(name string) bool {
-	return g.used[name]
-}
-
-func (g *nameGen) mark(name string) {
-	g.used[name] = true
 }
 
 type fieldInfo struct {
@@ -82,10 +103,8 @@ func inferFieldsWithPrefix(data map[string]any, ng *nameGen, prefix, filePrefix 
 				pascal = toPascal(strings.TrimPrefix(k, "_"))
 				f.StructType = filePrefix + pascal + "Cfg"
 				childPrefix = filePrefix + pascal
-				if !ng.seen(f.StructType) {
-					ng.mark(f.StructType)
-					f.Children = inferFieldsWithPrefix(val, ng, childPrefix, filePrefix)
-				}
+				children := inferFieldsWithPrefix(val, ng, childPrefix, filePrefix)
+				f.Children = ng.mergeStruct(f.StructType, children)
 			} else {
 				f.StructType = ng.unique(prefix + pascal + "Cfg")
 				childPrefix = prefix + pascal

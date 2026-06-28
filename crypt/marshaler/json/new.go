@@ -40,7 +40,7 @@ func NewJson(opts ...opt) (cc *Json) {
 	return
 }
 
-func (cc *Json) Marshal(v interface{}) ([]byte, error) {
+func (cc *Json) Marshal(v any) ([]byte, error) {
 	switch m := v.(type) {
 	case json.Marshaler:
 		return m.MarshalJSON()
@@ -54,7 +54,7 @@ func (cc *Json) Marshal(v interface{}) ([]byte, error) {
 	}
 }
 
-func (cc *Json) Unmarshal(data []byte, v interface{}) error {
+func (cc *Json) Unmarshal(data []byte, v any) error {
 	switch m := v.(type) {
 	case json.Unmarshaler:
 		return m.UnmarshalJSON(data)

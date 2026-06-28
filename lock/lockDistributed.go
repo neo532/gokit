@@ -49,7 +49,7 @@ return '` + evalOk + `'
 
 // IDistributedLockDb is the interface for DistributedLock's db.
 type IDistributedLockDb interface {
-	Eval(c context.Context, cmd string, keys []string, args []interface{}) (rst interface{}, err error)
+	Eval(c context.Context, cmd string, keys []string, args []any) (rst any, err error)
 }
 
 // DistributedLock is the instance for DistributedLock.
@@ -89,8 +89,8 @@ func (l *DistributedLock) Duration(d time.Duration) *DistributedLock {
 // UnLock unlocks.
 func (l *DistributedLock) UnLock(c context.Context, key string, code string) (err error) {
 	key = getLockKey(key)
-	var rst interface{}
-	if rst, err = l.db.Eval(c, unlockLuaScript, []string{key}, []interface{}{code}); err != nil {
+	var rst any
+	if rst, err = l.db.Eval(c, unlockLuaScript, []string{key}, []any{code}); err != nil {
 		return
 	}
 	e, ok := rst.(string)
@@ -112,8 +112,8 @@ func (l *DistributedLock) Lock(c context.Context, key string, expire, wait time.
 
 	endTs := time.Now().Add(wait)
 	for time.Now().Before(endTs) {
-		var rst interface{}
-		if rst, err = l.db.Eval(c, lockLuaScript, []string{key}, []interface{}{code, expire.Seconds()}); err != nil {
+		var rst any
+		if rst, err = l.db.Eval(c, lockLuaScript, []string{key}, []any{code, expire.Seconds()}); err != nil {
 			return
 		}
 

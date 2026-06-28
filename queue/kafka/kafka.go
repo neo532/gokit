@@ -28,12 +28,12 @@ func (l *logger) WithContext(c context.Context) *logger {
 	l.ctx = c
 	return l
 }
-func (l *logger) Print(v ...interface{}) {
+func (l *logger) Print(v ...any) {
 	l.log.Info(l.ctx, fmt.Sprintf("%+v", v))
 }
-func (l *logger) Printf(format string, v ...interface{}) {
+func (l *logger) Printf(format string, v ...any) {
 	l.log.Info(l.ctx, fmt.Sprintf(format, v...))
 }
-func (l *logger) Println(v ...interface{}) {
+func (l *logger) Println(v ...any) {
 	l.log.Info(l.ctx, fmt.Sprintf("%+v", v))
 }

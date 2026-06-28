@@ -20,7 +20,7 @@ var (
 	Grade             = 2
 )
 
-func New(format string, args ...interface{}) error {
+func New(format string, args ...any) error {
 
 	return string2error(
 		caller(2),
@@ -41,7 +41,7 @@ func Wrap(err error) error {
 	)
 }
 
-func Wrapf(err error, format string, args ...interface{}) error {
+func Wrapf(err error, format string, args ...any) error {
 
 	if err == nil {
 		return nil
@@ -69,7 +69,7 @@ func WrapError(err, err1 error) error {
 	)
 }
 
-func WrapErrorf(err, err1 error, format string, args ...interface{}) error {
+func WrapErrorf(err, err1 error, format string, args ...any) error {
 
 	if err == nil {
 		return Wrapf(err1, format, args...)

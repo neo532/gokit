@@ -26,7 +26,7 @@ func WithContextParam(fns ...logger.ContextArgs) Option {
 	}
 }
 
-func WithGlobalParam(kvs ...interface{}) Option {
+func WithGlobalParam(kvs ...any) Option {
 	return func(l *Logger) {
 		l.paramGlobal = kvs
 	}

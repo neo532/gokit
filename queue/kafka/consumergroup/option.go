@@ -24,9 +24,9 @@ func WithAutoCommit(b bool) Option {
 		o.conf.Consumer.Offsets.AutoCommit.Enable = b
 	}
 }
-func WithBalanceStrategy(strategy sarama.BalanceStrategy) Option {
+func WithBalanceStrategy(strategy ...sarama.BalanceStrategy) Option {
 	return func(o *ConsumerGroup) {
-		o.conf.Consumer.Group.Rebalance.Strategy = strategy
+		o.conf.Consumer.Group.Rebalance.GroupStrategies = strategy
 	}
 }
 func WithVersion(ver sarama.KafkaVersion) Option {

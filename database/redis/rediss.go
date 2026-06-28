@@ -8,13 +8,13 @@ package redis
 
 import (
 	"context"
-	"errors"
 	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 
 	"github.com/neo532/gokit/database"
+	"github.com/neo532/gokit/errorx"
 )
 
 // ========== RedissOpt =========
@@ -64,7 +64,7 @@ func setRdb(rs *Rdbs, o *Rediss, rdbs ...*Redis) {
 
 	dbNew := make([]*Redis, 0, len(rdbs))
 
-	var ok bool
+	var isUpdate bool
 	for _, db := range rdbs {
 
 		if err := db.Error(); err != nil {
@@ -72,17 +72,11 @@ func setRdb(rs *Rdbs, o *Rediss, rdbs ...*Redis) {
 			continue
 		}
 
-		if _, ok := dbOldM[db.Key()]; ok {
-			delete(dbOldM, db.Key())
-		}
-
 		dbNew = append(dbNew, db)
-
-		if !ok {
-			ok = true
-		}
+		delete(dbOldM, db.Key())
+		isUpdate = true
 	}
-	if ok {
+	if isUpdate {
 
 		rs.lock.Lock()
 		rs.rdbs = dbNew
@@ -92,7 +86,6 @@ func setRdb(rs *Rdbs, o *Rediss, rdbs ...*Redis) {
 			cleanUp(v)
 		}
 	}
-	return
 }
 func cleanUp(os ...*Redis) (err error) {
 	for _, o := range os {
@@ -130,9 +123,7 @@ func News(opts ...RedissOpt) (rdbs *Rediss) {
 		grayer:      &database.DefaultGrayer{},
 		pooler:      &RandomPolicy{},
 	}
-	if len(opts) > 0 {
-		rdbs.With(opts...)
-	}
+	rdbs.With(opts...)
 	return
 }
 
@@ -141,19 +132,15 @@ func (d *Rediss) With(opts ...RedissOpt) {
 		opt(d)
 	}
 	if d.def == nil {
-		d.err = errors.New("Please input a instance at least")
+		d.err = errorx.New("Nil Redis")
 	}
-}
-
-func (d *Rediss) Gray(c context.Context) (rdb *redis.Client) {
-	if d.grayer.Judge(c) && d.gray != nil {
-		return d.pooler.Choose(c, d.gray)
-	}
-	return d.Rdb(c)
 }
 
 func (d *Rediss) Rdb(c context.Context) (rdb *redis.Client) {
-	if d.benchmarker.Judge(c) && d.shadow != nil {
+	if d.gray != nil && d.grayer.Judge(c) {
+		return d.pooler.Choose(c, d.gray)
+	}
+	if d.shadow != nil && d.benchmarker.Judge(c) {
 		return d.pooler.Choose(c, d.shadow)
 	}
 	return d.pooler.Choose(c, d.def)

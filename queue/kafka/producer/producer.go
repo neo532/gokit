@@ -27,16 +27,16 @@ var (
 	producerMap  = make(map[string]*Producer, 2)
 )
 
-type EncodeMessageFunc func(message interface{}) (msg []byte, err error)
+type EncodeMessageFunc func(message any) (msg []byte, err error)
 
-func JsonMessageEncoder(message interface{}) (msg []byte, err error) {
+func JsonMessageEncoder(message any) (msg []byte, err error) {
 	return json.Marshal(message)
 }
 
 type Producer struct {
 	Name    string         `json:"name"`
 	Conf    *sarama.Config `json:"config"`
-	Addrs   []string       `json:"name"`
+	Addrs   []string       `json:"addrs"`
 	IsAsync bool           `json:"is_async"`
 	Topic   string         `json:"topic"`
 
@@ -82,7 +82,7 @@ func New(name string, addrs []string, opts ...Option) (pdc *Producer) {
 		return
 	}
 
-	ps := []interface{}{
+	ps := []any{
 		queue.KeyName, pdc.Name,
 		queue.KeyIsAsync, pdc.IsAsync,
 	}
@@ -148,11 +148,11 @@ func (pdc *Producer) Error() error {
 	return pdc.err
 }
 
-func (pdc *Producer) Send(c context.Context, message interface{}) (err error) {
+func (pdc *Producer) Send(c context.Context, message any) (err error) {
 
 	c = queue.InitHeaderToContext(c)
 
-	ps := []interface{}{
+	ps := []any{
 		queue.KeyName, pdc.Name,
 		queue.KeyIsAsync, pdc.IsAsync,
 	}
@@ -165,7 +165,7 @@ func (pdc *Producer) Send(c context.Context, message interface{}) (err error) {
 	}
 	ps = append(ps, queue.KeyMessage, string(msg))
 
-	h := func(c context.Context, message interface{}) (err error) {
+	h := func(c context.Context, message any) (err error) {
 
 		pm := &sarama.ProducerMessage{
 			Topic:     pdc.Topic,
@@ -182,7 +182,7 @@ func (pdc *Producer) Send(c context.Context, message interface{}) (err error) {
 
 			h.Range(func(k string, v string) bool {
 				pm.Headers = append(pm.Headers, sarama.RecordHeader{
-					[]byte(k), []byte(v),
+					Key: []byte(k), Value: []byte(v),
 				})
 				return true
 			})

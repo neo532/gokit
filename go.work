@@ -13,4 +13,5 @@ use (
 	./database/redis
 	./database/orm
 	./cmd
+	./cmd/wire-gen-go-provider
 )

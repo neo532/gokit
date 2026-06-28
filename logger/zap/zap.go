@@ -21,7 +21,7 @@ var _ logger.Executor = (*Logger)(nil)
 
 type Logger struct {
 	err          error
-	paramGlobal  []interface{}
+	paramGlobal  []any
 	paramContext []logger.ContextArgs
 
 	writer writer.Writer
@@ -40,7 +40,7 @@ type Logger struct {
 
 func New(opts ...Option) (l *Logger) {
 	l = &Logger{
-		paramGlobal:  make([]interface{}, 0, 2),
+		paramGlobal:  make([]any, 0, 2),
 		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
 		level:        logger.ParseLevel(""),
@@ -79,7 +79,7 @@ func New(opts ...Option) (l *Logger) {
 	return
 }
 
-func (l *Logger) Log(c context.Context, level logger.Level, message string, p ...interface{}) (err error) {
+func (l *Logger) Log(c context.Context, level logger.Level, message string, p ...any) (err error) {
 
 	ls := len(p)
 	ps := make([]zap.Field, 0, ls/2+len(l.paramContext))

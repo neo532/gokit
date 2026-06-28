@@ -64,11 +64,13 @@ func WithDb(i int32) Option {
 func WithSlowTime(t time.Duration) Option {
 	return func(o *Redis) {
 		o.redisLogger.slowLogTime = t
+		o.optsHash["slowLogTime"] = t
 	}
 }
 func WithLogger(l logger.ILogger) Option {
 	return func(o *Redis) {
 		o.redisLogger.logger = l
+		o.optsHash["logger"] = l
 	}
 }
 func WithContext(c context.Context) Option {
@@ -85,15 +87,15 @@ var (
 )
 
 type Redis struct {
-	close            func()          `json:"-"`
-	err              error           `json:"-"`
-	redisLogger      *RedisLogger    `json:"-"`
-	bootstrapContext context.Context `json:"-"`
-	key              string          `json:"-"`
+	close            func()
+	err              error
+	redisLogger      *RedisLogger
+	bootstrapContext context.Context
+	key              string
 
-	client   *redis.Client          `json:"-"`
-	redisOpt *redis.Options         `json:"-"`
-	optsHash map[string]interface{} `json:"optsHash"`
+	client   *redis.Client
+	redisOpt *redis.Options
+	optsHash map[string]any
 }
 
 func New(name string, addr string, opts ...Option) (rdb *Redis) {
@@ -109,7 +111,7 @@ func New(name string, addr string, opts ...Option) (rdb *Redis) {
 			MaxRetries:  0,
 		},
 		bootstrapContext: context.Background(),
-		optsHash:         make(map[string]interface{}, 2),
+		optsHash:         make(map[string]any, 2),
 		redisLogger: &RedisLogger{
 			Name:        name,
 			logger:      logger.NewDefaultILogger(),
@@ -186,9 +188,9 @@ func (o *Redis) Close() func() {
 type redisCtxBegintimeKey struct{}
 
 type RedisLogger struct {
-	Name        string         `json:"name"`
-	slowLogTime time.Duration  `json:"slowTime"`
-	logger      logger.ILogger `json:"-"`
+	Name        string
+	slowLogTime time.Duration
+	logger      logger.ILogger
 }
 
 func (h *RedisLogger) BeforeProcess(c context.Context, cmd redis.Cmder) (context.Context, error) {
@@ -201,21 +203,21 @@ func (h *RedisLogger) AfterProcess(c context.Context, cmd redis.Cmder) (err erro
 	begin := c.Value(redisCtxBegintimeKey{}).(time.Time)
 	cost := time.Since(begin)
 
-	p := []interface{}{
+	p := []any{
 		database.KeyName, h.Name,
 		database.KeyLimitTime, h.slowLogTime,
 		database.KeyCostTime, cost.Seconds(),
-	}
-
-	if cost > h.slowLogTime {
-		h.logger.Warn(c, database.FlagSlow+cmd.String(), p...)
-		return
 	}
 
 	// error
 	if cmd.Err() != nil && cmd.Err() != redis.Nil {
 		p = append(p, database.KeyError, cmd.Err())
 		h.logger.Error(c, cmd.String(), p...)
+		return
+	}
+
+	if cost > h.slowLogTime {
+		h.logger.Warn(c, database.FlagSlow+cmd.String(), p...)
 		return
 	}
 
@@ -239,7 +241,7 @@ func (h *RedisLogger) AfterProcessPipeline(c context.Context, cmds []redis.Cmder
 	begin := c.Value(redisCtxBegintimeKey{}).(time.Time)
 	cost := time.Since(begin)
 
-	p := []interface{}{
+	p := []any{
 		database.KeyName, h.Name,
 		database.KeyLimitTime, h.slowLogTime,
 		database.KeyCostTime, cost.Seconds(),

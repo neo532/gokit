@@ -127,10 +127,10 @@ func NewRequest(clt Client, opts ...RequestOption) (req *Request) {
 	return
 }
 
-func (r *Request) Do(ctx context.Context, req interface{}, reply interface{}) (c context.Context, err error) {
+func (r *Request) Do(ctx context.Context, req any, reply any) (c context.Context, err error) {
 	c = ctx
 
-	h := func(ctx context.Context, req interface{}, reply interface{}) (c context.Context, err error) {
+	h := func(ctx context.Context, req any, reply any) (c context.Context, err error) {
 		c = ctx
 
 		url := r.url
@@ -293,13 +293,13 @@ func HasBody(method string) (b bool) {
 type DecodeErrorFunc func(c context.Context, res *http.Response) (cancelRetry bool, err error)
 
 // EncodeRequestFunc is request encode func.
-type EncodeRequestFunc func(c context.Context, contentType string, in interface{}) (body []byte, err error)
+type EncodeRequestFunc func(c context.Context, contentType string, in any) (body []byte, err error)
 
 // DecodeResponseFunc is response decode func.
-type DecodeResponseFunc func(c context.Context, res *http.Response, out interface{}) (body []byte, err error)
+type DecodeResponseFunc func(c context.Context, res *http.Response, out any) (body []byte, err error)
 
 // DefaultRequestEncoder is an HTTP request encoder.
-func DefaultRequestEncoder(c context.Context, contentType string, in interface{}) (body []byte, err error) {
+func DefaultRequestEncoder(c context.Context, contentType string, in any) (body []byte, err error) {
 	subContentType := ContentSubtype(contentType)
 	codec := marshaler.GetMarshaler(subContentType)
 	if codec == nil {
@@ -310,7 +310,7 @@ func DefaultRequestEncoder(c context.Context, contentType string, in interface{}
 }
 
 // DefaultResponseDecoder is an HTTP response decoder.
-func DefaultResponseDecoder(c context.Context, res *http.Response, v interface{}) (body []byte, err error) {
+func DefaultResponseDecoder(c context.Context, res *http.Response, v any) (body []byte, err error) {
 	if v == nil {
 		return
 	}

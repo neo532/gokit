@@ -36,7 +36,7 @@ const (
 
 // IFreqDb is the interface for FreqRule.
 type IFreqDb interface {
-	Eval(c context.Context, cmd string, keys []string, args []interface{}) (rst interface{}, err error)
+	Eval(c context.Context, cmd string, keys []string, args []any) (rst any, err error)
 	Get(c context.Context, key string) (string, error)
 }
 
@@ -102,8 +102,8 @@ func (f *Freq) Check(c context.Context, pre string, rule ...FreqRule) (bRst bool
 // Incr increments the count only.
 func (f *Freq) Incr(c context.Context, pre string, rule ...FreqRule) (bRst bool, err error) {
 	bRst = f.freq(pre, rule, func(key string, expire, times int64) bool {
-		var tsOri interface{}
-		if tsOri, err = f.db.Eval(c, incrLuaScript, []string{key}, []interface{}{expire}); err != nil {
+		var tsOri any
+		if tsOri, err = f.db.Eval(c, incrLuaScript, []string{key}, []any{expire}); err != nil {
 			return false
 		}
 
@@ -118,8 +118,8 @@ func (f *Freq) Incr(c context.Context, pre string, rule ...FreqRule) (bRst bool,
 // IncrCheck increments and checks the count.
 func (f *Freq) IncrCheck(c context.Context, pre string, rule ...FreqRule) (bRst bool, err error) {
 	bRst = f.freq(pre, rule, func(key string, expire, times int64) bool {
-		var tsOri interface{}
-		if tsOri, err = f.db.Eval(c, incrLuaScript, []string{key}, []interface{}{expire}); err != nil {
+		var tsOri any
+		if tsOri, err = f.db.Eval(c, incrLuaScript, []string{key}, []any{expire}); err != nil {
 			return false
 		}
 

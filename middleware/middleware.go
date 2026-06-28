@@ -5,7 +5,7 @@ import (
 )
 
 // Handler defines the handler invoked by Middleware.
-type Handler func(c context.Context, request, reply interface{}) (context.Context, error)
+type Handler func(c context.Context, request, reply any) (context.Context, error)
 
 // Middleware is HTTP/gRPC transport middleware.
 type Middleware func(Handler) Handler

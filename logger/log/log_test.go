@@ -9,7 +9,7 @@ import (
 )
 
 func createLog() (h logger.Logger) {
-	cp := func(c context.Context) (key string, value interface{}) {
+	cp := func(c context.Context) (key string, value any) {
 		return "aa", "bbbbbbbbb"
 	}
 	l := New(

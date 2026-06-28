@@ -9,10 +9,10 @@ import (
 )
 
 func newSlog() (h logger.Logger) {
-	cp := func(c context.Context) (key string, value interface{}) {
+	cp := func(c context.Context) (key string, value any) {
 		return "aa", "bbbbbbbbb"
 	}
-	sp := func(c context.Context) (key string, value interface{}) {
+	sp := func(c context.Context) (key string, value any) {
 		file, line := logger.GetSourceByDepth(7)
 		return "source", fmt.Sprintf("%s,%d", file, line)
 	}
@@ -30,7 +30,8 @@ func newSlog() (h logger.Logger) {
 		WithGlobalParam("a", "b", "1", "2"),
 		WithLevel("info"),
 		WithContextParam(cp, sp),
-		WithReplaceAttr(func() (k string, v interface{}) { return "msg", "" }),
+		WithReplaceAttr(func() (k string, v any) { return "msg", "" }),
+		WithTextSeparator("||"),
 		// WithHandler(NewPrettyHandler()),
 	)
 	if err := l.Error(); err != nil {

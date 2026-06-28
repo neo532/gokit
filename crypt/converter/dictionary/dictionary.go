@@ -1,10 +1,11 @@
 package dictionary
 
 import (
-	"github.com/neo532/gokit/crypt/converter"
-	"github.com/neo532/gokit/util"
 	"math/big"
 	"strings"
+
+	"github.com/neo532/gokit/crypt/converter"
+	"github.com/neo532/gokit/util/stringx"
 )
 
 var _ converter.Converter = (*Dictionary)(nil)
@@ -42,7 +43,7 @@ func (o *Dictionary) String(i int64) (s string) {
 		str.WriteString(string(o.dict[i%lenD]))
 		i = i / lenD
 	}
-	return util.Reverse(str.String())
+	return stringx.Reverse(str.String())
 }
 
 func (o *Dictionary) Int(s string) (i int64, err error) {

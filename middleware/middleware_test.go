@@ -9,7 +9,7 @@ import (
 // Create test middleware
 func createMiddleware(id int) Middleware {
 	return func(next Handler) Handler {
-		return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+		return func(ctx context.Context, req, reply any) (context.Context, error) {
 			return next(ctx, req, reply)
 		}
 	}
@@ -22,7 +22,7 @@ func TestChain(t *testing.T) {
 	// Create test middleware
 	createTrackingMiddleware := func(id int) Middleware {
 		return func(next Handler) Handler {
-			return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+			return func(ctx context.Context, req, reply any) (context.Context, error) {
 				executionOrder = append(executionOrder, id)
 				return next(ctx, req, reply)
 			}
@@ -30,7 +30,7 @@ func TestChain(t *testing.T) {
 	}
 
 	// Create test handler
-	handler := func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+	handler := func(ctx context.Context, req, reply any) (context.Context, error) {
 		executionOrder = append(executionOrder, 0) // 0 represents the handler
 		return ctx, nil
 	}
@@ -94,14 +94,14 @@ func TestMiddlewareErrorHandling(t *testing.T) {
 	// Create middleware that returns an error
 	errorMiddleware := func(err error) Middleware {
 		return func(next Handler) Handler {
-			return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+			return func(ctx context.Context, req, reply any) (context.Context, error) {
 				return nil, err
 			}
 		}
 	}
 
 	// Create test handler
-	handler := func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+	handler := func(ctx context.Context, req, reply any) (context.Context, error) {
 		return ctx, nil
 	}
 
@@ -139,9 +139,9 @@ func TestMiddlewareErrorHandling(t *testing.T) {
 
 func TestMiddlewareContextHandling(t *testing.T) {
 	// Create middleware that modifies context
-	contextMiddleware := func(key, value interface{}) Middleware {
+	contextMiddleware := func(key, value any) Middleware {
 		return func(next Handler) Handler {
-			return func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+			return func(ctx context.Context, req, reply any) (context.Context, error) {
 				newCtx := context.WithValue(ctx, key, value)
 				return next(newCtx, req, reply)
 			}
@@ -149,21 +149,21 @@ func TestMiddlewareContextHandling(t *testing.T) {
 	}
 
 	// Create test handler
-	handler := func(ctx context.Context, req, reply interface{}) (context.Context, error) {
+	handler := func(ctx context.Context, req, reply any) (context.Context, error) {
 		return ctx, nil
 	}
 
 	tests := []struct {
 		name           string
 		middlewares    []Middleware
-		expectedValues map[interface{}]interface{}
+		expectedValues map[any]any
 	}{
 		{
 			name: "single context modification",
 			middlewares: []Middleware{
 				contextMiddleware("key1", "value1"),
 			},
-			expectedValues: map[interface{}]interface{}{
+			expectedValues: map[any]any{
 				"key1": "value1",
 			},
 		},
@@ -173,7 +173,7 @@ func TestMiddlewareContextHandling(t *testing.T) {
 				contextMiddleware("key1", "value1"),
 				contextMiddleware("key2", "value2"),
 			},
-			expectedValues: map[interface{}]interface{}{
+			expectedValues: map[any]any{
 				"key1": "value1",
 				"key2": "value2",
 			},

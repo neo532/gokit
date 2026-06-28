@@ -5,7 +5,7 @@ import (
 )
 
 // ProducerHandler defines the handler invoked by Middleware.
-type ProducerHandler func(c context.Context, message interface{}) error
+type ProducerHandler func(c context.Context, message any) error
 
 // ProducerMiddleware is queue transport middleware.
 type ProducerMiddleware func(ProducerHandler) ProducerHandler

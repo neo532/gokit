@@ -178,7 +178,7 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 
 	c := session.Context()
 	var message []byte
-	var ps []interface{}
+	var ps []any
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -201,7 +201,7 @@ func (h *groupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim s
 		case m, ok := <-claim.Messages():
 
 			message = m.Value
-			ps = []interface{}{
+			ps = []any{
 				queue.KeyName, h.name,
 				queue.KeyPartition, m.Partition,
 				queue.KeyOffset, m.Offset,

@@ -69,7 +69,7 @@ func WithContextParam(fns ...logger.ContextArgs) Option {
 	}
 }
 
-func WithGlobalParam(kvs ...interface{}) Option {
+func WithGlobalParam(kvs ...any) Option {
 	return func(l *Logger) {
 		ls := len(kvs)
 		ps := make([]zap.Field, 0, ls/2)

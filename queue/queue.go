@@ -11,7 +11,7 @@ import (
 )
 
 type Producer interface {
-	Send(c context.Context, message interface{}) (err error)
+	Send(c context.Context, message any) (err error)
 	Close() func()
 	Error() error
 }

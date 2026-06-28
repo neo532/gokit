@@ -11,7 +11,7 @@ import (
 
 func TraceID() queue.ProducerMiddleware {
 	return func(handler queue.ProducerHandler) queue.ProducerHandler {
-		return func(c context.Context, message interface{}) (err error) {
+		return func(c context.Context, message any) (err error) {
 
 			c = queue.AppendHeaderToContext(c, "traceID", "aaaaaaaa")
 			err = handler(c, message)

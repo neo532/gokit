@@ -14,7 +14,7 @@ var _ logger.Executor = (*Logger)(nil)
 
 type Logger struct {
 	err          error
-	paramGlobal  []interface{}
+	paramGlobal  []any
 	paramContext []logger.ContextArgs
 	level        logger.Level
 
@@ -27,7 +27,7 @@ type Logger struct {
 func New(opts ...Option) (l *Logger) {
 
 	l = &Logger{
-		paramGlobal:  make([]interface{}, 0, 2),
+		paramGlobal:  make([]any, 0, 2),
 		paramContext: make([]logger.ContextArgs, 0, 2),
 		writer:       stdout.New(),
 		opts:         &slog.HandlerOptions{},
@@ -66,10 +66,14 @@ func (l *Logger) ParamContext() []logger.ContextArgs {
 	return l.paramContext
 }
 
-func (l *Logger) Log(c context.Context, level logger.Level, message string, p ...interface{}) (err error) {
+func (l *Logger) Log(c context.Context, level logger.Level, message string, p ...any) (err error) {
 
 	for _, fn := range l.paramContext {
-		p = append(p, slog.Any(fn(c)))
+		k, v := fn(c)
+		if k == "" {
+			continue
+		}
+		p = append(p, slog.Any(k, v))
 	}
 
 	switch level {

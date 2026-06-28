@@ -96,7 +96,7 @@ func setDB(rs *DBs, o *Orms, dbs ...*Orm) {
 
 	dbNew := make([]*Orm, 0, len(dbs))
 
-	var ok bool
+	var isUpdate bool
 	for _, db := range dbs {
 
 		if err := db.Error(); err != nil {
@@ -104,17 +104,11 @@ func setDB(rs *DBs, o *Orms, dbs ...*Orm) {
 			continue
 		}
 
-		if _, ok := dbOldM[db.Key()]; ok {
-			delete(dbOldM, db.Key())
-		}
-
+		delete(dbOldM, db.Key())
 		dbNew = append(dbNew, db)
-
-		if !ok {
-			ok = true
-		}
+		isUpdate = true
 	}
-	if ok {
+	if isUpdate {
 
 		rs.lock.Lock()
 		rs.dbs = dbNew
@@ -124,7 +118,6 @@ func setDB(rs *DBs, o *Orms, dbs ...*Orm) {
 			cleanUp(v)
 		}
 	}
-	return
 }
 
 func cleanUp(os ...*Orm) (err error) {

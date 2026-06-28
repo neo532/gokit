@@ -69,7 +69,7 @@ Also a `NoSpinLock` is provided for local lock without spinning.
         cache *redis.Client
     }
 
-    func (l *RedisOne) Eval(c context.Context, cmd string, keys []string, args []interface{}) (interface{}, error) {
+    func (l *RedisOne) Eval(c context.Context, cmd string, keys []string, args []any) (any, error) {
         return l.cache.Eval(c, cmd, keys, args...).Result()
     }
 
@@ -114,7 +114,7 @@ It is a frequency with single instance by redis.
         cache *redis.Client
     }
 
-    func (l *RedisOne) Eval(c context.Context, cmd string, keys []string, args []interface{}) (interface{}, error) {
+    func (l *RedisOne) Eval(c context.Context, cmd string, keys []string, args []any) (any, error) {
         return l.cache.Eval(c, cmd, keys, args...).Result()
     }
 
@@ -351,7 +351,7 @@ HTTP/gRPC transport middleware with a chain helper.
 
     func logging() middleware.Middleware {
         return func(next middleware.Handler) middleware.Handler {
-            return func(c context.Context, request, reply interface{}) (context.Context, error) {
+            return func(c context.Context, request, reply any) (context.Context, error) {
                 log.Println("before")
                 c, err := next(c, request, reply)
                 log.Println("after")
@@ -362,7 +362,7 @@ HTTP/gRPC transport middleware with a chain helper.
 
     func main() {
         chain := middleware.Chain(logging(), recovery())
-        chain(func(c context.Context, request, reply interface{}) (context.Context, error) {
+        chain(func(c context.Context, request, reply any) (context.Context, error) {
             // handler logic
             return c, nil
         })(ctx, req, &reply)

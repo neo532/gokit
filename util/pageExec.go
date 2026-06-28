@@ -7,16 +7,12 @@ package util
  * @date 2020-10-16
  */
 
-import (
-	"math"
-)
-
 // PageExec make slice execute in paging.
 func PageExec(total int64, pageSize int, fn func(begin, end int64, page int) error) (err error) {
 	if total == 0 || pageSize == 0 {
 		return
 	}
-	pageNum := int(math.Ceil(float64(total) / float64(pageSize)))
+	pageNum := int((total + int64(pageSize) - 1) / int64(pageSize))
 
 	var b, e int64
 	var i int

@@ -27,46 +27,39 @@ const (
 //	0: ver1 = ver2, Equal
 //
 // -1: ver1 < ver2, Smaller
-func CompareVersion(ver1, ver2 string) (r int, err error) {
+func CompareVersion(ver1, ver2 string) (int, error) {
+	v1 := strings.Split(strings.Trim(strings.TrimSpace(ver1), "."), ".")
+	v2 := strings.Split(strings.Trim(strings.TrimSpace(ver2), "."), ".")
 
-	v1 := strings.Split(strings.Trim(ver1, "."), ".")
-	v2 := strings.Split(strings.Trim(ver2, "."), ".")
 	v1Len := len(v1)
 	v2Len := len(v2)
 
-	lMin := v1Len
-	r = Smaller
+	maxLen := max(v1Len, v2Len)
 
-	diff := v1Len - v2Len
-	if diff > 0 {
-		lMin = v2Len
-		r = Larger
-	}
-
-	var v1i, v2i int
-	for i := 0; i < lMin; i++ {
-		if v1i, err = strconv.Atoi(v1[i]); err != nil {
-			return
+	for i := 0; i < maxLen; i++ {
+		var v1i, v2i int
+		if i < v1Len {
+			n, err := strconv.Atoi(v1[i])
+			if err != nil {
+				return 0, err
+			}
+			v1i = n
 		}
-		if v2i, err = strconv.Atoi(v2[i]); err != nil {
-			return
+		if i < v2Len {
+			n, err := strconv.Atoi(v2[i])
+			if err != nil {
+				return 0, err
+			}
+			v2i = n
 		}
 		if v1i < v2i {
-			r = Smaller
-			return
+			return Smaller, nil
 		}
 		if v1i > v2i {
-			r = Larger
-			return
+			return Larger, nil
 		}
 	}
-
-	if diff == 0 {
-		r = Equal
-		return
-	}
-
-	return
+	return Equal, nil
 }
 
 func CompareSlice[T comparable](v1, v2 []T) (b bool) {
